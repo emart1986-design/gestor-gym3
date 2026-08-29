@@ -1,1 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1B3A6B">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Gestor Gym">
+  <link rel="manifest" href="manifest.json">
+  <title>Gestor de Gym</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1f2937; }
+    .container { padding: 1rem; max-width: 100%; min-height: 100vh; }
+    .header { background: linear-gradient(135deg, #1B3A6B 0%, #0F2847 100%); padding: 1.5rem; border-radius: 12px; color: white; margin-bottom: 1.5rem; }
+    .header h1 { margin: 0; font-size: 24px; font-weight: 500; }
+    .header p { margin: 8px 0 0; font-size: 14px; opacity: 0.9; }
+    .mes-selector { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 8px; align-items: center; }
+    .mes-selector button { padding: 10px 14px; background: white; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 14px; cursor: pointer; color: #1B3A6B; font-weight: 600; }
+    .mes-selector select { flex: 1; padding: 12px; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 16px; font-weight: 700; background: white; color: #1B3A6B; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+    .stat-card { background: white; border: 0.5px solid #e5e7eb; border-radius: 8px; padding: 1rem; text-align: center; }
+    .stat-card p { margin: 0; font-size: 12px; }
+    .stat-value { margin: 8px 0 0 !important; font-size: 26px; font-weight: 700; }
+    .stat-total { color: #1B3A6B; }
+    .stat-pagaron { color: #059669; }
+    .stat-nopagan { color: #dc2626; }
+    .grafico { background: white; border: 0.5px solid #e5e7eb; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .grafico p { margin: 0 0 1rem; font-size: 14px; font-weight: 600; color: #1B3A6B; }
+    .grafico-container { height: 160px; display: flex; align-items: flex-end; gap: 8px; border-bottom: 0.5px solid #e5e7eb; padding-bottom: 1rem; }
+    .horarios { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; overflow: hidden; margin-bottom: 1.5rem; }
+    .horario-header { background: #1B3A6B; color: white; padding: 1rem; font-size: 15px; font-weight: 600; }
+    .horario-content { padding: 0.5rem 1rem; background: white; }
+    .alumno-fila { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 0.5px solid #f3f4f6; }
+    .alumno-fila:last-child { border-bottom: none; }
+    .alumno-nombre { font-weight: 700; font-size: 17px; color: #000000; flex: 1; cursor: pointer; user-select: none; padding: 4px 0; }
+    .alumno-estado { padding: 6px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .estado-pagado { background: #d1fae5; color: #059669; }
+    .estado-nopagado { background: #fee2e2; color: #dc2626; }
+    .btn-delete { margin-left: 10px; background: #dc2626; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .btn-agregar { width: 100%; padding: 14px 16px; background: #1B3A6B; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; color: white; margin-bottom: 1rem; }
+    .sin-alumnos { padding: 1rem 0; font-size: 13px; color: #9ca3af; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: flex-end; justify-content: center; }
+    .modal-content { background: white; border-radius: 16px 16px 0 0; padding: 2rem; width: 100%; max-width: 500px; }
+    .modal-content h2 { margin: 0 0 1.5rem; font-size: 20px; color: #1B3A6B; font-weight: 700; }
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-size: 13px; color: #6b7280; margin-bottom: 6px; font-weight: 600; }
+    .form-input, .form-select { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+    .modal-buttons { display: flex; gap: 10px; margin-top: 1.5rem; }
+    .btn-cancelar { flex: 1; padding: 12px; background: white; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; color: #6b7280; }
+    .btn-guardar { flex: 2; padding: 12px; background: #1B3A6B; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>💰 Gestor de Gym</h1>
+      <p>Historial de pagos</p>
+    </div>
 
+    <div class="mes-selector">
+      <button id="btn-mes-ant">←</button>
+      <select id="select-mes">
+        <option value="2026-08">Agosto 2026</option>
+        <option value="2026-09">Septiembre 2026</option>
+        <option value="2026-10">Octubre 2026</option>
+        <option value="2026-11">Noviembre 2026</option>
+        <option value="2026-12">Diciembre 2026</option>
+        <option value="2027-01">Enero 2027</option>
+        <option value="2027-02">Febrero 2027</option>
+        <option value="2027-03">Marzo 2027</option>
+        <option value="2027-04">Abril 2027</option>
+        <option value="2027-05">Mayo 2027</option>
+        <option value="2027-06">Junio 2027</option>
+        <option value="2027-07">Julio 2027</option>
+        <option value="2027-08">Agosto 2027</option>
+        <option value="2027-09">Septiembre 2027</option>
+        <option value="2027-10">Octubre 2027</option>
+        <option value="2027-11">Noviembre 2027</option>
+        <option value="2027-12">Diciembre 2027</option>
+      </select>
+      <button id="btn-mes-sig">→</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <p style="color:#6b7280;">Total</p>
+        <p class="stat-value stat-total" id="total-mes">$0</p>
+      </div>
+      <div class="stat-card">
+        <p style="color:#059669;">Pagaron</p>
+        <p class="stat-value stat-pagaron" id="pagaron-mes">0</p>
+      </div>
+      <div class="stat-card">
+        <p style="color:#dc2626;">No pagan</p>
+        <p class="stat-value stat-nopagan" id="no-pagan-mes">0</p>
+      </div>
+    </div>
+
+    <div class="grafico">
+      <p>Comparativa últimos meses</p>
+      <div class="grafico-container" id="grafico-container"></div>
+    </div>
+
+    <div class="horarios" id="horarios-container"></div>
+
+    <button class="btn-agregar" id="btn-agregar">+ Agregar alumno</button>
+  </div>
+
+  <div class="modal-overlay" id="modal-agregar">
+    <div class="modal-content">
+      <h2>Agregar alumno</h2>
+      <div class="form-group">
+        <label class="form-label">Nombre</label>
+        <input type="text" class="form-input" id="input-nombre" placeholder="Nombre del alumno">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Horario</label>
+        <select class="form-select" id="select-horario">
+          <option value="19-20">19 a 20</option>
+          <option value="10-11">10 a 11</option>
+          <option value="20-21">20 a 21</option>
+          <option value="21-22">21 a 22</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Monto ($)</label>
+        <input type="number" class="form-input" id="input-monto" value="2000">
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-cancelar" id="btn-cancelar">Cancelar</button>
+        <button class="btn-guardar" id="btn-guardar">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
+
+const horarios = ["19-20","10-11","20-21","21-22"];
+const etiquetas = {"19-20":"🕐 19 a 20","10-11":"🕐 10 a 11","20-21":"🕐 20 a 21","21-22":"🕐 21 a 22"};
+const mesesNombre = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Set","Oct","Nov","Dic"];
+
+function getMaster() {
+  let m = JSON.parse(localStorage.getItem("gym_master") || "null");
+  if (!m) {
+    m = {
+      "19-20":[{nombre:"Manuel",monto:1200},{nombre:"Irina",monto:1200},{nombre:"Santi no",monto:1200},{nombre:"Lagarto",monto:1200},{nombre:"Manuel chico",monto:1200}],
+      "10-11":[{nombre:"Casanova",monto:2000},{nombre:"Fer",monto:2500},{nombre:"Amigo 2",monto:2500},{nombre:"Lorenzo",monto:2500},{nombre:"Niki",monto:1200}],
+      "20-21":[{nombre:"Guillermina",monto:1200},{nombre:"Alejo",monto:1200},{nombre:"Ayle",monto:1200},{nombre:"Juanma",monto:1200},{nombre:"Alexander",monto:1200},{nombre:"Cristian",monto:2000},{nombre:"Valentin",monto:1200},{nombre:"Nataly",monto:1200}],
+      "21-22":[{nombre:"Soledad Madre",monto:1200},{nombre:"Hija1",monto:1200},{nombre:"Hija2",monto:1200},{nombre:"Amigo de Lucas",monto:1200},{nombre:"Lucas",monto:1200}]
+    };
+    localStorage.setItem("gym_master", JSON.stringify(m));
+  }
+  return m;
+}
+
+function getData() { return JSON.parse(localStorage.getItem("gym_data") || "{}"); }
+function saveMaster(m) { localStorage.setItem("gym_master", JSON.stringify(m)); }
+function saveData(d) { localStorage.setItem("gym_data", JSON.stringify(d)); }
+
+function ensureMes(mes) {
+  let data = getData();
+  let master = getMaster();
+  if (!data[mes]) {
+    data[mes] = {};
+    for (const h of horarios) {
+      data[mes][h] = master[h].map(a => ({...a, pago: false}));
+    }
+    saveData(data);
+  }
+  return data;
+}
+
+function calcTotales(mes, data) {
+  let dataMes = data[mes] || {};
+  let total = 0, pagaron = 0, noPagan = 0;
+  for (const h of horarios) {
+    for (const a of (dataMes[h] || [])) {
+      if (a.pago) { total += a.monto; pagaron++; } else { noPagan++; }
+    }
+  }
+  document.getElementById("total-mes").textContent = "$" + total.toLocaleString();
+  document.getElementById("pagaron-mes").textContent = pagaron;
+  document.getElementById("no-pagan-mes").textContent = noPagan;
+}
+
+function dibujarGrafico() {
+  let data = getData();
+  let meses = Object.keys(data).sort().slice(-6);
+  let container = document.getElementById("grafico-container");
+  container.innerHTML = "";
+  let maxTotal = Math.max(...meses.map(m => totalRaw(m, data)), 1);
+  for (const mes of meses) {
+    let total = totalRaw(mes, data);
+    let altura = Math.round((total / maxTotal) * 130);
+    let [a, m] = mes.split("-");
+    let col = document.createElement("div");
+    col.style.cssText = "flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;";
+    col.innerHTML = `<div style="width:100%;height:${altura}px;background:#1B3A6B;border-radius:4px 4px 0 0;min-height:4px;"></div><span style="font-size:11px;color:#6b7280;font-weight:600;">${mesesNombre[parseInt(m)-1]}</span><span style="font-size:10px;color:#6b7280;">$${Math.round(total/1000)}k</span>`;
+    container.appendChild(col);
+  }
+}
+
+function totalRaw(mes, data) {
+  let total = 0;
+  for (const h of horarios) for (const a of ((data[mes]||{})[h]||[])) if (a.pago) total += a.monto;
+  return total;
+}
+
+function renderizar(mes) {
+  let data = ensureMes(mes);
+  let dataMes = data[mes];
+  let container = document.getElementById("horarios-container");
+  container.innerHTML = "";
+
+  for (const horario of horarios) {
+    let seccion = document.createElement("div");
+    let header = document.createElement("div");
+    header.className = "horario-header";
+    header.textContent = etiquetas[horario];
+    seccion.appendChild(header);
+
+    let contenido = document.createElement("div");
+    contenido.className = "horario-content";
+
+    let alumnos = dataMes[horario] || [];
+    if (alumnos.length === 0) {
+      contenido.innerHTML = '<p class="sin-alumnos">Sin alumnos</p>';
+    } else {
+      for (let i = 0; i < alumnos.length; i++) {
+        let alumno = alumnos[i];
+        let fila = document.createElement("div");
+        fila.className = "alumno-fila";
+
+        let nombre = document.createElement("span");
+        nombre.className = "alumno-nombre";
+        nombre.textContent = alumno.nombre;
+        nombre.onclick = () => {
+          alumno.pago = !alumno.pago;
+          saveData(data);
+          renderizar(mes);
+          calcTotales(mes, getData());
+          dibujarGrafico();
+        };
+
+        let estado = document.createElement("span");
+        estado.className = "alumno-estado " + (alumno.pago ? "estado-pagado" : "estado-nopagado");
+        estado.textContent = alumno.pago ? "✓ $" + alumno.monto : "✗ NO PAGÓ";
+
+        let btnDel = document.createElement("button");
+        btnDel.className = "btn-delete";
+        btnDel.textContent = "✕";
+        btnDel.onclick = () => {
+          let master = getMaster();
+          master[horario] = master[horario].filter(a => a.nombre !== alumno.nombre);
+          saveMaster(master);
+          dataMes[horario].splice(i, 1);
+          saveData(data);
+          renderizar(mes);
+          calcTotales(mes, getData());
+          dibujarGrafico();
+        };
+
+        fila.appendChild(nombre);
+        fila.appendChild(estado);
+        fila.appendChild(btnDel);
+        contenido.appendChild(fila);
+      }
+    }
+    seccion.appendChild(contenido);
+    container.appendChild(seccion);
+  }
+
+  calcTotales(mes, data);
+  dibujarGrafico();
+}
+
+let mesActual = "2026-08";
+document.getElementById("select-mes").value = mesActual;
+renderizar(mesActual);
+
+document.getElementById("select-mes").onchange = e => { mesActual = e.target.value; renderizar(mesActual); };
+
+document.getElementById("btn-mes-ant").onclick = () => {
+  let opts = [...document.getElementById("select-mes").options];
+  let idx = opts.findIndex(o => o.value === mesActual);
+  if (idx > 0) { mesActual = opts[idx-1].value; document.getElementById("select-mes").value = mesActual; renderizar(mesActual); }
+};
+
+document.getElementById("btn-mes-sig").onclick = () => {
+  let opts = [...document.getElementById("select-mes").options];
+  let idx = opts.findIndex(o => o.value === mesActual);
+  if (idx < opts.length-1) { mesActual = opts[idx+1].value; document.getElementById("select-mes").value = mesActual; renderizar(mesActual); }
+};
+
+document.getElementById("btn-agregar").onclick = () => {
+  document.getElementById("modal-agregar").style.display = "flex";
+  document.getElementById("input-nombre").focus();
+};
+
+document.getElementById("btn-cancelar").onclick = () => {
+  document.getElementById("modal-agregar").style.display = "none";
+};
+
+document.getElementById("btn-guardar").onclick = () => {
+  let nombre = document.getElementById("input-nombre").value.trim();
+  let horario = document.getElementById("select-horario").value;
+  let monto = parseInt(document.getElementById("input-monto").value) || 0;
+
+  if (!nombre) { alert("Ingresa el nombre"); return; }
+
+  let master = getMaster();
+  let data = getData();
+
+  master[horario].push({nombre, monto});
+  saveMaster(master);
+
+  if (!data[mesActual]) data[mesActual] = {};
+  if (!data[mesActual][horario]) data[mesActual][horario] = [];
+  data[mesActual][horario].push({nombre, monto, pago: false});
+  saveData(data);
+
+  document.getElementById("input-nombre").value = "";
+  document.getElementById("input-monto").value = "2000";
+  document.getElementById("modal-agregar").style.display = "none";
+
+  renderizar(mesActual);
+};
+  </script>
+</body>
+</html>
