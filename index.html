@@ -33,6 +33,9 @@
     .buscador { width: 100%; padding: 12px; border: 0.5px solid #e5e7eb; border-radius: 8px; font-size: 15px; margin-bottom: 1rem; background: white; }
     .recordatorio { background: white; border: 2px solid #000000; border-radius: 8px; padding: 12px 14px; margin-bottom: 1.5rem; font-size: 13px; font-weight: 600; color: #000000; }
     .recordatorio b { color: #dc2626; }
+    .btn-toggle { width: 100%; padding: 10px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 13px; font-weight: 600; color: #000000; cursor: pointer; margin-bottom: 1rem; }
+    .btn-toggle.activo { background: #000000; color: white; border-color: #000000; }
+    .alumno-riesgo { background: #fef2f2; margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; }
     .acciones { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
     .btn-accion { flex: 1 1 30%; padding: 10px 6px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 12px; font-weight: 600; color: #000000; cursor: pointer; }
     .btn-edit { margin-left: 10px; background: #f0f0f0; border: none; color: #000000; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -118,6 +121,8 @@
     </div>
 
     <input type="text" id="buscador" class="buscador" placeholder="🔍 Buscar alumno...">
+
+    <button class="btn-toggle" id="btn-solo-pendientes">Ver solo pendientes</button>
 
     <div class="horarios" id="horarios-container"></div>
 
@@ -270,6 +275,23 @@ function totalRaw(mes, data) {
   return total;
 }
 
+function estaEnRiesgo(data, mes, horario, nombre) {
+  let meses = Object.keys(data).sort();
+  let idx = meses.indexOf(mes);
+  if (idx === -1) return false;
+  let streak = 0;
+  for (let i = idx; i >= 0; i--) {
+    let arr = data[meses[i]][horario];
+    if (!arr) break;
+    let alumno = arr.find(a => a.nombre === nombre);
+    if (!alumno) break;
+    if (alumno.pago) break;
+    streak++;
+    if (streak >= 2) return true;
+  }
+  return false;
+}
+
 function renderizar(mes) {
   let data = ensureMes(mes);
   let dataMes = data[mes];
@@ -294,18 +316,24 @@ function renderizar(mes) {
 
     let alumnos = (dataMes[horario] || [])
       .filter(a => a.nombre.toLowerCase().includes(filtro))
+      .filter(a => !soloPendientes || !a.pago)
       .sort((a, b) => a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" }));
     if (alumnos.length === 0) {
-      contenido.innerHTML = '<p class="sin-alumnos">' + (filtro ? "Sin resultados" : "Sin alumnos") + '</p>';
+      let msg = filtro ? "Sin resultados" : (soloPendientes ? "Todos pagaron ✓" : "Sin alumnos");
+      contenido.innerHTML = '<p class="sin-alumnos">' + msg + '</p>';
     } else {
       for (let i = 0; i < alumnos.length; i++) {
         let alumno = alumnos[i];
         let fila = document.createElement("div");
         fila.className = "alumno-fila";
+        if (!alumno.pago && estaEnRiesgo(data, mes, horario, alumno.nombre)) {
+          fila.classList.add("alumno-riesgo");
+        }
 
         let nombre = document.createElement("span");
         nombre.className = "alumno-nombre";
-        nombre.textContent = alumno.nombre;
+        nombre.textContent = (fila.classList.contains("alumno-riesgo") ? "⚠️ " : "") + alumno.nombre;
+        if (fila.classList.contains("alumno-riesgo")) nombre.title = "No pagó los últimos 2 meses o más";
         nombre.onclick = () => {
           alumno.pago = !alumno.pago;
           alumno.fechaPago = alumno.pago ? new Date().toLocaleDateString("es-AR") : null;
@@ -470,6 +498,7 @@ function renderizarListaHorarios() {
 }
 
 let editando = null;
+let soloPendientes = false;
 
 function abrirModalEdicion(horario, alumno) {
   editando = { horario, nombre: alumno.nombre };
@@ -584,6 +613,13 @@ document.getElementById("btn-mes-sig").onclick = () => {
 };
 
 document.getElementById("buscador").oninput = () => renderizar(mesActual);
+
+document.getElementById("btn-solo-pendientes").onclick = () => {
+  soloPendientes = !soloPendientes;
+  document.getElementById("btn-solo-pendientes").classList.toggle("activo", soloPendientes);
+  document.getElementById("btn-solo-pendientes").textContent = soloPendientes ? "✓ Viendo solo pendientes" : "Ver solo pendientes";
+  renderizar(mesActual);
+};
 
 document.getElementById("btn-agregar").onclick = () => {
   editando = null;
