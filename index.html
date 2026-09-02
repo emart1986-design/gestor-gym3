@@ -19,13 +19,18 @@
     .mes-selector { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 8px; align-items: center; }
     .mes-selector button { padding: 10px 14px; background: white; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 14px; cursor: pointer; color: #1B3A6B; font-weight: 600; }
     .mes-selector select { flex: 1; padding: 12px; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 16px; font-weight: 700; background: white; color: #1B3A6B; }
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1.5rem; }
     .stat-card { background: white; border: 0.5px solid #e5e7eb; border-radius: 8px; padding: 1rem; text-align: center; }
     .stat-card p { margin: 0; font-size: 12px; }
     .stat-value { margin: 8px 0 0 !important; font-size: 26px; font-weight: 700; }
     .stat-total { color: #1B3A6B; }
     .stat-pagaron { color: #059669; }
     .stat-nopagan { color: #dc2626; }
+    .stat-pendiente { color: #d97706; }
+    .buscador { width: 100%; padding: 12px; border: 0.5px solid #e5e7eb; border-radius: 8px; font-size: 15px; margin-bottom: 1rem; background: white; }
+    .acciones { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .btn-accion { flex: 1 1 30%; padding: 10px 6px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 12px; font-weight: 600; color: #1B3A6B; cursor: pointer; }
+    .btn-edit { margin-left: 10px; background: #eef2ff; border: none; color: #1B3A6B; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .grafico { background: white; border: 0.5px solid #e5e7eb; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
     .grafico p { margin: 0 0 1rem; font-size: 14px; font-weight: 600; color: #1B3A6B; }
     .grafico-container { height: 160px; display: flex; align-items: flex-end; gap: 8px; border-bottom: 0.5px solid #e5e7eb; padding-bottom: 1rem; }
@@ -61,32 +66,18 @@
 
     <div class="mes-selector">
       <button id="btn-mes-ant">←</button>
-      <select id="select-mes">
-        <option value="2026-08">Agosto 2026</option>
-        <option value="2026-09">Septiembre 2026</option>
-        <option value="2026-10">Octubre 2026</option>
-        <option value="2026-11">Noviembre 2026</option>
-        <option value="2026-12">Diciembre 2026</option>
-        <option value="2027-01">Enero 2027</option>
-        <option value="2027-02">Febrero 2027</option>
-        <option value="2027-03">Marzo 2027</option>
-        <option value="2027-04">Abril 2027</option>
-        <option value="2027-05">Mayo 2027</option>
-        <option value="2027-06">Junio 2027</option>
-        <option value="2027-07">Julio 2027</option>
-        <option value="2027-08">Agosto 2027</option>
-        <option value="2027-09">Septiembre 2027</option>
-        <option value="2027-10">Octubre 2027</option>
-        <option value="2027-11">Noviembre 2027</option>
-        <option value="2027-12">Diciembre 2027</option>
-      </select>
+      <select id="select-mes"></select>
       <button id="btn-mes-sig">→</button>
     </div>
 
     <div class="stats">
       <div class="stat-card">
-        <p style="color:#6b7280;">Total</p>
+        <p style="color:#6b7280;">Total cobrado</p>
         <p class="stat-value stat-total" id="total-mes">$0</p>
+      </div>
+      <div class="stat-card">
+        <p style="color:#d97706;">Pendiente</p>
+        <p class="stat-value stat-pendiente" id="pendiente-mes">$0</p>
       </div>
       <div class="stat-card">
         <p style="color:#059669;">Pagaron</p>
@@ -102,6 +93,14 @@
       <p>Comparativa últimos meses</p>
       <div class="grafico-container" id="grafico-container"></div>
     </div>
+
+    <div class="acciones">
+      <button class="btn-accion" id="btn-exportar">⬇️ Exportar backup</button>
+      <button class="btn-accion" id="btn-importar">⬆️ Importar backup</button>
+      <input type="file" id="input-importar" accept="application/json" style="display:none;">
+    </div>
+
+    <input type="text" id="buscador" class="buscador" placeholder="🔍 Buscar alumno...">
 
     <div class="horarios" id="horarios-container"></div>
 
@@ -175,15 +174,16 @@ function ensureMes(mes) {
 
 function calcTotales(mes, data) {
   let dataMes = data[mes] || {};
-  let total = 0, pagaron = 0, noPagan = 0;
+  let total = 0, pagaron = 0, noPagan = 0, pendiente = 0;
   for (const h of horarios) {
     for (const a of (dataMes[h] || [])) {
-      if (a.pago) { total += a.monto; pagaron++; } else { noPagan++; }
+      if (a.pago) { total += a.monto; pagaron++; } else { noPagan++; pendiente += a.monto; }
     }
   }
   document.getElementById("total-mes").textContent = "$" + total.toLocaleString();
   document.getElementById("pagaron-mes").textContent = pagaron;
   document.getElementById("no-pagan-mes").textContent = noPagan;
+  document.getElementById("pendiente-mes").textContent = "$" + pendiente.toLocaleString();
 }
 
 function dibujarGrafico() {
@@ -214,20 +214,21 @@ function renderizar(mes) {
   let dataMes = data[mes];
   let container = document.getElementById("horarios-container");
   container.innerHTML = "";
+  let filtro = (document.getElementById("buscador").value || "").trim().toLowerCase();
 
   for (const horario of horarios) {
     let seccion = document.createElement("div");
     let header = document.createElement("div");
     header.className = "horario-header";
-    header.textContent = etiquetas[horario];
+    header.textContent = etiquetas[horario] + " (" + (dataMes[horario] || []).length + ")";
     seccion.appendChild(header);
 
     let contenido = document.createElement("div");
     contenido.className = "horario-content";
 
-    let alumnos = dataMes[horario] || [];
+    let alumnos = (dataMes[horario] || []).filter(a => a.nombre.toLowerCase().includes(filtro));
     if (alumnos.length === 0) {
-      contenido.innerHTML = '<p class="sin-alumnos">Sin alumnos</p>';
+      contenido.innerHTML = '<p class="sin-alumnos">' + (filtro ? "Sin resultados" : "Sin alumnos") + '</p>';
     } else {
       for (let i = 0; i < alumnos.length; i++) {
         let alumno = alumnos[i];
@@ -249,10 +250,17 @@ function renderizar(mes) {
         estado.className = "alumno-estado " + (alumno.pago ? "estado-pagado" : "estado-nopagado");
         estado.textContent = alumno.pago ? "✓ $" + alumno.monto : "✗ NO PAGÓ";
 
+        let btnEdit = document.createElement("button");
+        btnEdit.className = "btn-edit";
+        btnEdit.textContent = "✎";
+        btnEdit.onclick = () => abrirModalEdicion(horario, alumno);
+
         let btnDel = document.createElement("button");
         btnDel.className = "btn-delete";
         btnDel.textContent = "✕";
         btnDel.onclick = () => {
+          if (!confirm("¿Eliminar a " + alumno.nombre + " de este mes en adelante? Se conserva en los meses anteriores.")) return;
+
           let master = getMaster();
           master[horario] = master[horario].filter(a => a.nombre !== alumno.nombre);
           saveMaster(master);
@@ -270,6 +278,7 @@ function renderizar(mes) {
 
         fila.appendChild(nombre);
         fila.appendChild(estado);
+        fila.appendChild(btnEdit);
         fila.appendChild(btnDel);
         contenido.appendChild(fila);
       }
@@ -282,7 +291,63 @@ function renderizar(mes) {
   dibujarGrafico();
 }
 
-let mesActual = "2026-08";
+function mesActualReal() {
+  let d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+}
+
+function generarOpcionesMes() {
+  let mesesExistentes = Object.keys(getData());
+  let hoy = new Date();
+  let cursor = new Date(hoy.getFullYear(), hoy.getMonth() - 12, 1);
+  let fin = new Date(hoy.getFullYear(), hoy.getMonth() + 12, 1);
+  let mesesSet = new Set();
+  while (cursor <= fin) {
+    mesesSet.add(cursor.getFullYear() + "-" + String(cursor.getMonth() + 1).padStart(2, "0"));
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  for (const m of mesesExistentes) mesesSet.add(m);
+
+  let select = document.getElementById("select-mes");
+  let valorPrevio = select.value;
+  select.innerHTML = "";
+  for (const m of [...mesesSet].sort()) {
+    let [anio, mes] = m.split("-");
+    let opt = document.createElement("option");
+    opt.value = m;
+    opt.textContent = mesesNombre[parseInt(mes) - 1] + " " + anio;
+    select.appendChild(opt);
+  }
+  if (valorPrevio && [...select.options].some(o => o.value === valorPrevio)) select.value = valorPrevio;
+}
+
+let editando = null;
+
+function abrirModalEdicion(horario, alumno) {
+  editando = { horario, nombre: alumno.nombre };
+  document.querySelector("#modal-agregar h2").textContent = "Editar alumno";
+  document.getElementById("btn-guardar").textContent = "Guardar cambios";
+  document.getElementById("input-nombre").value = alumno.nombre;
+  document.getElementById("select-horario").value = horario;
+  document.getElementById("input-monto").value = alumno.monto;
+  document.getElementById("modal-agregar").style.display = "flex";
+  document.getElementById("input-nombre").focus();
+}
+
+function cerrarModal() {
+  editando = null;
+  document.querySelector("#modal-agregar h2").textContent = "Agregar alumno";
+  document.getElementById("btn-guardar").textContent = "Guardar";
+  document.getElementById("input-nombre").value = "";
+  document.getElementById("input-monto").value = "2000";
+  document.getElementById("modal-agregar").style.display = "none";
+}
+
+generarOpcionesMes();
+let mesActual = mesActualReal();
+if (![...document.getElementById("select-mes").options].some(o => o.value === mesActual)) {
+  mesActual = document.getElementById("select-mes").options[0].value;
+}
 document.getElementById("select-mes").value = mesActual;
 renderizar(mesActual);
 
@@ -300,14 +365,20 @@ document.getElementById("btn-mes-sig").onclick = () => {
   if (idx < opts.length-1) { mesActual = opts[idx+1].value; document.getElementById("select-mes").value = mesActual; renderizar(mesActual); }
 };
 
+document.getElementById("buscador").oninput = () => renderizar(mesActual);
+
 document.getElementById("btn-agregar").onclick = () => {
+  editando = null;
+  document.querySelector("#modal-agregar h2").textContent = "Agregar alumno";
+  document.getElementById("btn-guardar").textContent = "Guardar";
+  document.getElementById("input-nombre").value = "";
+  document.getElementById("input-monto").value = "2000";
+  document.getElementById("select-horario").value = horarios[0];
   document.getElementById("modal-agregar").style.display = "flex";
   document.getElementById("input-nombre").focus();
 };
 
-document.getElementById("btn-cancelar").onclick = () => {
-  document.getElementById("modal-agregar").style.display = "none";
-};
+document.getElementById("btn-cancelar").onclick = cerrarModal;
 
 document.getElementById("btn-guardar").onclick = () => {
   let nombre = document.getElementById("input-nombre").value.trim();
@@ -319,25 +390,98 @@ document.getElementById("btn-guardar").onclick = () => {
   let master = getMaster();
   let data = getData();
 
-  master[horario].push({nombre, monto});
-  saveMaster(master);
+  if (editando) {
+    let idxMaster = master[editando.horario].findIndex(a => a.nombre === editando.nombre);
+    if (idxMaster !== -1) master[editando.horario].splice(idxMaster, 1);
+    master[horario].push({ nombre, monto });
+    saveMaster(master);
 
-  if (!data[mesActual]) data[mesActual] = {};
-  if (!data[mesActual][horario]) data[mesActual][horario] = [];
-  data[mesActual][horario].push({nombre, monto, pago: false});
-
-  for (const key of Object.keys(data)) {
-    if (key > mesActual && data[key][horario] && !data[key][horario].some(a => a.nombre === nombre)) {
-      data[key][horario].push({nombre, monto, pago: false});
+    for (const key of Object.keys(data)) {
+      if (key <= mesActual) continue;
+      let arr = data[key][editando.horario];
+      if (!arr) continue;
+      let idx = arr.findIndex(a => a.nombre === editando.nombre);
+      if (idx === -1) continue;
+      if (horario === editando.horario) {
+        arr[idx].nombre = nombre;
+        arr[idx].monto = monto;
+      } else {
+        let pago = arr[idx].pago;
+        arr.splice(idx, 1);
+        if (!data[key][horario]) data[key][horario] = [];
+        data[key][horario].push({ nombre, monto, pago });
+      }
     }
+    saveData(data);
+  } else {
+    master[horario].push({nombre, monto});
+    saveMaster(master);
+
+    if (!data[mesActual]) data[mesActual] = {};
+    if (!data[mesActual][horario]) data[mesActual][horario] = [];
+    data[mesActual][horario].push({nombre, monto, pago: false});
+
+    for (const key of Object.keys(data)) {
+      if (key > mesActual && data[key][horario] && !data[key][horario].some(a => a.nombre === nombre)) {
+        data[key][horario].push({nombre, monto, pago: false});
+      }
+    }
+    saveData(data);
   }
-  saveData(data);
 
-  document.getElementById("input-nombre").value = "";
-  document.getElementById("input-monto").value = "2000";
-  document.getElementById("modal-agregar").style.display = "none";
-
+  cerrarModal();
+  generarOpcionesMes();
   renderizar(mesActual);
+};
+
+document.getElementById("btn-exportar").onclick = () => {
+  let backup = { master: getMaster(), data: getData(), exportado: new Date().toISOString() };
+  let blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  let url = URL.createObjectURL(blob);
+  let a = document.createElement("a");
+  a.href = url;
+  a.download = "gestor-gym-backup-" + mesActualReal() + ".json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
+document.getElementById("btn-importar").onclick = () => {
+  document.getElementById("input-importar").click();
+};
+
+document.getElementById("input-importar").onchange = e => {
+  let file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  let reader = new FileReader();
+  reader.onload = () => {
+    let backup;
+    try {
+      backup = JSON.parse(reader.result);
+    } catch (err) {
+      alert("El archivo no es un backup valido");
+      return;
+    }
+    if (!backup || typeof backup.master !== "object" || typeof backup.data !== "object") {
+      alert("El archivo no es un backup valido");
+      return;
+    }
+    if (!confirm("Esto reemplaza todos los datos actuales por los del archivo. ¿Continuar?")) return;
+    saveMaster(backup.master);
+    saveData(backup.data);
+    generarOpcionesMes();
+    if ([...document.getElementById("select-mes").options].some(o => o.value === mesActual)) {
+      document.getElementById("select-mes").value = mesActual;
+    } else {
+      mesActual = document.getElementById("select-mes").options[0].value;
+      document.getElementById("select-mes").value = mesActual;
+    }
+    renderizar(mesActual);
+    alert("Datos importados correctamente");
+  };
+  reader.readAsText(file);
 };
   </script>
 </body>
