@@ -213,13 +213,6 @@
         <label class="form-label">Cuota regular desde el 2do mes ($)</label>
         <input type="number" class="form-input" id="input-monto-regular" placeholder="Igual a la matrícula">
       </div>
-      <div class="form-group" id="grupo-desde-cuando" style="display:none;">
-        <label class="form-label">¿Desde cuándo aplica el monto/horario nuevo?</label>
-        <select class="form-select" id="select-desde-cuando">
-          <option value="actual">Desde este mes</option>
-          <option value="proximo">Desde el próximo mes</option>
-        </select>
-      </div>
       <div class="form-group" id="grupo-pausado" style="display:none;">
         <label class="vendas-check">
           <input type="checkbox" id="check-pausado">
@@ -732,8 +725,6 @@ function abrirModalEdicion(horario, alumno) {
   document.getElementById("label-monto").textContent = "Monto ($)";
   document.getElementById("input-monto").value = alumno.monto;
   document.getElementById("grupo-monto-regular").style.display = "none";
-  document.getElementById("grupo-desde-cuando").style.display = "block";
-  document.getElementById("select-desde-cuando").value = "actual";
   document.getElementById("grupo-pausado").style.display = "block";
   document.getElementById("check-pausado").checked = !!alumno.pausado;
   document.getElementById("modal-agregar").classList.add("show");
@@ -749,7 +740,6 @@ function cerrarModal() {
   document.getElementById("input-monto").value = "2000";
   document.getElementById("input-monto-regular").value = "";
   document.getElementById("grupo-monto-regular").style.display = "block";
-  document.getElementById("grupo-desde-cuando").style.display = "none";
   document.getElementById("grupo-pausado").style.display = "none";
   document.getElementById("modal-agregar").classList.remove("show");
 }
@@ -901,7 +891,6 @@ document.getElementById("btn-agregar").onclick = () => {
   document.getElementById("input-monto").value = "2000";
   document.getElementById("input-monto-regular").value = "";
   document.getElementById("grupo-monto-regular").style.display = "block";
-  document.getElementById("grupo-desde-cuando").style.display = "none";
   document.getElementById("grupo-pausado").style.display = "none";
   refrescarSelectHorario();
   document.getElementById("select-horario").value = horarios[0];
@@ -931,7 +920,6 @@ document.getElementById("btn-guardar").onclick = () => {
 
   if (editando) {
     let pausado = document.getElementById("check-pausado").checked;
-    let desdeCuando = document.getElementById("select-desde-cuando").value;
     let idxMaster = (master[editando.horario] || []).findIndex(a => a.nombre === editando.nombre);
     if (idxMaster !== -1) master[editando.horario].splice(idxMaster, 1);
     if (!master[horario]) master[horario] = [];
@@ -940,13 +928,6 @@ document.getElementById("btn-guardar").onclick = () => {
 
     for (const key of Object.keys(data)) {
       if (key < mesActual) continue;
-      if (key === mesActual && desdeCuando === "proximo") {
-        let arr = data[key][editando.horario];
-        if (!arr) continue;
-        let idx = arr.findIndex(a => a.nombre === editando.nombre);
-        if (idx !== -1) arr[idx].pausado = pausado;
-        continue;
-      }
       actualizarRegistroMes(data, key, editando.horario, horario, editando.nombre, nombre, monto, pausado);
     }
     saveData(data);
