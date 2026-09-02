@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,55 +13,66 @@
   <title>Sauce Boxeo - Gestor de Gym</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1f2937; }
-    .container { padding: 1rem; max-width: 100%; min-height: 100vh; }
-    .header { background: white; border: 2px solid #000000; padding: 1rem 1.25rem; border-radius: 12px; color: #000000; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 14px; }
+    .container { padding: 1rem; padding-top: calc(1rem + env(safe-area-inset-top)); padding-bottom: calc(1rem + env(safe-area-inset-bottom)); max-width: 100%; min-height: 100vh; }
+    .header { background: white; border: 2px solid #000000; padding: 1rem 1.25rem; border-radius: 12px; color: #000000; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-card); }
     .header img { height: 46px; width: auto; flex-shrink: 0; }
     .header h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
     .header p { margin: 2px 0 0; font-size: 12px; color: #6b7280; }
-    .mes-selector { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 8px; align-items: center; }
-    .mes-selector button { padding: 10px 14px; background: white; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 14px; cursor: pointer; color: #000000; font-weight: 600; }
+    .mes-selector { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 8px; align-items: center; box-shadow: var(--shadow-card); }
+    .mes-selector button { padding: 10px 14px; background: white; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 14px; cursor: pointer; color: #000000; font-weight: 600; transition: background-color .15s ease; }
     .mes-selector select { flex: 1; padding: 12px; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 16px; font-weight: 700; background: white; color: #000000; }
     .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1.5rem; }
-    .stat-card { background: white; border: 0.5px solid #e5e7eb; border-radius: 8px; padding: 1rem; text-align: center; }
+    .stat-card { background: white; border: 0.5px solid #e5e7eb; border-radius: 8px; padding: 1rem; text-align: center; box-shadow: var(--shadow-card); }
     .stat-card p { margin: 0; font-size: 12px; }
     .stat-value { margin: 8px 0 0 !important; font-size: 26px; font-weight: 700; }
     .stat-total { color: #000000; }
     .stat-pagaron { color: #059669; }
     .stat-nopagan { color: #dc2626; }
     .stat-pendiente { color: #4b5563; }
-    .buscador { width: 100%; padding: 12px; border: 0.5px solid #e5e7eb; border-radius: 8px; font-size: 15px; margin-bottom: 1rem; background: white; }
-    .recordatorio { background: white; border: 2px solid #000000; border-radius: 8px; padding: 12px 14px; margin-bottom: 1.5rem; font-size: 13px; font-weight: 600; color: #000000; }
+    .progreso-wrap { background: white; border: 0.5px solid #e5e7eb; border-radius: 8px; padding: 12px 14px; margin-bottom: 1.5rem; box-shadow: var(--shadow-card); }
+    .progreso-label { display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; font-weight: 600; margin-bottom: 6px; }
+    .progreso-barra { width: 100%; height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+    .progreso-fill { height: 100%; background: #000000; border-radius: 4px; transition: width .3s ease; }
+    .buscador-wrap { position: relative; margin-bottom: 1rem; }
+    .buscador-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+    .buscador { width: 100%; padding: 12px 12px 12px 38px; border: 0.5px solid #e5e7eb; border-radius: 8px; font-size: 15px; background: white; box-shadow: var(--shadow-card); }
+    .recordatorio { background: white; border: 2px solid #000000; border-radius: 8px; padding: 12px 14px; margin-bottom: 1.5rem; font-size: 13px; font-weight: 600; color: #000000; box-shadow: var(--shadow-card); display: flex; align-items: center; gap: 8px; }
     .recordatorio b { color: #dc2626; }
-    .btn-toggle { width: 100%; padding: 10px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 13px; font-weight: 600; color: #000000; cursor: pointer; margin-bottom: 1rem; }
+    .btn-toggle { width: 100%; padding: 10px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 13px; font-weight: 600; color: #000000; cursor: pointer; margin-bottom: 1rem; transition: background-color .15s ease, color .15s ease; }
     .btn-toggle.activo { background: #000000; color: white; border-color: #000000; }
-    .alumno-riesgo { background: #fef2f2; margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; }
+    .alumno-riesgo { background: #fef2f2; margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; transition: background-color .15s ease; }
     .acciones { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
-    .btn-accion { flex: 1 1 30%; padding: 10px 6px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 12px; font-weight: 600; color: #000000; cursor: pointer; }
-    .btn-edit { margin-left: 10px; background: #f0f0f0; border: none; color: #000000; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .btn-hist { margin-left: 10px; background: #f3f4f6; border: none; color: #000000; cursor: pointer; font-size: 15px; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .btn-accion { flex: 1 1 30%; padding: 10px 6px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 12px; font-weight: 600; color: #000000; cursor: pointer; box-shadow: var(--shadow-card); display: flex; align-items: center; justify-content: center; gap: 5px; }
+    .btn-edit { margin-left: 10px; background: #f0f0f0; border: none; color: #000000; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background-color .15s ease; }
+    .btn-hist { margin-left: 10px; background: #f3f4f6; border: none; color: #000000; cursor: pointer; font-size: 15px; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background-color .15s ease; }
     .historial-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid #f3f4f6; font-size: 14px; }
     .historial-item:last-child { border-bottom: none; }
     .historial-pagado { color: #059669; font-weight: 700; }
     .historial-nopagado { color: #dc2626; font-weight: 700; }
     .historial-lista { max-height: 50vh; overflow-y: auto; }
-    .grafico { background: white; border: 0.5px solid #e5e7eb; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .grafico { background: white; border: 0.5px solid #e5e7eb; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-card); }
     .grafico p { margin: 0 0 1rem; font-size: 14px; font-weight: 600; color: #000000; }
-    .grafico-container { height: 160px; display: flex; align-items: flex-end; gap: 8px; border-bottom: 0.5px solid #e5e7eb; padding-bottom: 1rem; }
-    .horarios { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; overflow: hidden; margin-bottom: 1.5rem; }
+    .grafico-container { height: 160px; display: flex; align-items: flex-end; gap: 8px; border-bottom: 1px solid #000000; padding-bottom: 1rem; }
+    .grafico-barra { transition: opacity .15s ease; cursor: default; }
+    .grafico-barra:hover { opacity: 0.7; }
+    .horarios { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; overflow: hidden; margin-bottom: 1.5rem; box-shadow: var(--shadow-card); }
     .horario-header { background: #000000; color: white; padding: 1rem; font-size: 15px; font-weight: 600; }
     .horario-content { padding: 0.5rem 1rem; background: white; }
     .alumno-fila { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 0.5px solid #f3f4f6; }
     .alumno-fila:last-child { border-bottom: none; }
     .alumno-nombre { font-weight: 700; font-size: 17px; color: #000000; flex: 1; cursor: pointer; user-select: none; padding: 4px 0; }
-    .alumno-estado { padding: 6px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .alumno-estado { padding: 6px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; white-space: nowrap; transition: background-color .15s ease, color .15s ease; }
     .estado-pagado { background: #d1fae5; color: #059669; }
     .estado-nopagado { background: #fee2e2; color: #dc2626; }
-    .btn-delete { margin-left: 10px; background: #dc2626; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .btn-agregar { width: 100%; padding: 14px 16px; background: #000000; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; color: white; margin-bottom: 1rem; }
+    .btn-delete { margin-left: 10px; background: #dc2626; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background-color .15s ease; }
+    .btn-agregar { width: 100%; padding: 14px 16px; background: #000000; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; color: white; margin-bottom: calc(1rem + env(safe-area-inset-bottom)); box-shadow: var(--shadow-card); }
     .sin-alumnos { padding: 1rem 0; font-size: 13px; color: #9ca3af; }
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: flex-end; justify-content: center; }
-    .modal-content { background: white; border-radius: 16px 16px 0 0; padding: 2rem; width: 100%; max-width: 500px; }
+    .modal-overlay { display: flex; visibility: hidden; opacity: 0; pointer-events: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: flex-end; justify-content: center; transition: opacity .2s ease, visibility .2s ease; }
+    .modal-overlay.show { visibility: visible; opacity: 1; pointer-events: auto; }
+    .modal-content { background: white; border-radius: 16px 16px 0 0; padding: 2rem; padding-bottom: calc(2rem + env(safe-area-inset-bottom)); width: 100%; max-width: 500px; transform: translateY(30px); transition: transform .25s ease; }
+    .modal-overlay.show .modal-content { transform: translateY(0); }
     .modal-content h2 { margin: 0 0 1.5rem; font-size: 20px; color: #000000; font-weight: 700; }
     .form-group { margin-bottom: 1rem; }
     .form-label { display: block; font-size: 13px; color: #6b7280; margin-bottom: 6px; font-weight: 600; }
@@ -108,19 +119,30 @@
       </div>
     </div>
 
+    <div class="progreso-wrap">
+      <div class="progreso-label">
+        <span>Cobrado este mes</span>
+        <span id="progreso-texto">0%</span>
+      </div>
+      <div class="progreso-barra"><div class="progreso-fill" id="progreso-fill" style="width:0%"></div></div>
+    </div>
+
     <div class="grafico">
       <p>Comparativa últimos meses</p>
       <div class="grafico-container" id="grafico-container"></div>
     </div>
 
     <div class="acciones">
-      <button class="btn-accion" id="btn-horarios">🕐 Horarios</button>
-      <button class="btn-accion" id="btn-exportar">⬇️ Exportar backup</button>
-      <button class="btn-accion" id="btn-importar">⬆️ Importar backup</button>
+      <button class="btn-accion" id="btn-horarios"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Horarios</button>
+      <button class="btn-accion" id="btn-exportar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar backup</button>
+      <button class="btn-accion" id="btn-importar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Importar backup</button>
       <input type="file" id="input-importar" accept="application/json" style="display:none;">
     </div>
 
-    <input type="text" id="buscador" class="buscador" placeholder="🔍 Buscar alumno...">
+    <div class="buscador-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="buscador" class="buscador" placeholder="Buscar alumno...">
+    </div>
 
     <button class="btn-toggle" id="btn-solo-pendientes">Ver solo pendientes</button>
 
@@ -180,6 +202,15 @@
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
 
 const mesesNombre = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Set","Oct","Nov","Dic"];
+
+const ICONOS_SVG = {
+  documento: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  alerta: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+};
+function svgIcon(nombre, size) {
+  size = size || 14;
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;">' + ICONOS_SVG[nombre] + '</svg>';
+}
 
 function getHorariosConfig() {
   let h = JSON.parse(localStorage.getItem("gym_horarios") || "null");
@@ -249,6 +280,11 @@ function calcTotales(mes, data) {
   document.getElementById("pagaron-mes").textContent = pagaron;
   document.getElementById("no-pagan-mes").textContent = noPagan;
   document.getElementById("pendiente-mes").textContent = "$" + pendiente.toLocaleString();
+
+  let totalAlumnos = pagaron + noPagan;
+  let porcentaje = totalAlumnos === 0 ? 0 : Math.round((pagaron / totalAlumnos) * 100);
+  document.getElementById("progreso-fill").style.width = porcentaje + "%";
+  document.getElementById("progreso-texto").textContent = porcentaje + "% (" + pagaron + "/" + totalAlumnos + ")";
 }
 
 function dibujarGrafico() {
@@ -261,9 +297,10 @@ function dibujarGrafico() {
     let total = totalRaw(mes, data);
     let altura = Math.round((total / maxTotal) * 130);
     let [a, m] = mes.split("-");
+    let esActual = mes === mesActual;
     let col = document.createElement("div");
     col.style.cssText = "flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;";
-    col.innerHTML = `<div style="width:100%;height:${altura}px;background:#000000;border-radius:4px 4px 0 0;min-height:4px;"></div><span style="font-size:11px;color:#6b7280;font-weight:600;">${mesesNombre[parseInt(m)-1]}</span><span style="font-size:10px;color:#6b7280;">$${Math.round(total/1000)}k</span>`;
+    col.innerHTML = `<div class="grafico-barra" title="${mesesNombre[parseInt(m)-1]} ${a}: $${total.toLocaleString()}" style="width:100%;height:${altura}px;background:${esActual ? "#000000" : "#9ca3af"};border-radius:4px 4px 0 0;min-height:4px;"></div><span style="font-size:11px;color:${esActual ? "#000000" : "#6b7280"};font-weight:${esActual ? "700" : "600"};">${mesesNombre[parseInt(m)-1]}</span><span style="font-size:10px;color:#6b7280;">$${Math.round(total/1000)}k</span>`;
     container.appendChild(col);
   }
 }
@@ -332,8 +369,9 @@ function renderizar(mes) {
 
         let nombre = document.createElement("span");
         nombre.className = "alumno-nombre";
-        nombre.textContent = (fila.classList.contains("alumno-riesgo") ? "⚠️ " : "") + alumno.nombre;
-        if (fila.classList.contains("alumno-riesgo")) nombre.title = "No pagó los últimos 2 meses o más";
+        let enRiesgo = fila.classList.contains("alumno-riesgo");
+        nombre.innerHTML = (enRiesgo ? '<span style="color:#dc2626;">' + svgIcon("alerta", 14) + '</span> ' : "") + alumno.nombre;
+        if (enRiesgo) nombre.title = "No pagó los últimos 2 meses o más";
         nombre.onclick = () => {
           alumno.pago = !alumno.pago;
           alumno.fechaPago = alumno.pago ? new Date().toLocaleDateString("es-AR") : null;
@@ -350,7 +388,7 @@ function renderizar(mes) {
 
         let btnHist = document.createElement("button");
         btnHist.className = "btn-hist";
-        btnHist.textContent = "🕘";
+        btnHist.innerHTML = svgIcon("documento", 15);
         btnHist.onclick = () => abrirHistorial(alumno.nombre);
 
         let btnEdit = document.createElement("button");
@@ -425,9 +463,10 @@ function mostrarRecordatorio() {
     return;
   }
 
-  el.style.display = "block";
-  el.innerHTML = "⚠️ Quedan <b>" + diasRestantes + " día" + (diasRestantes === 1 ? "" : "s") + "</b> del mes y <b>" +
-    noPagaron + " alumno" + (noPagaron === 1 ? "" : "s") + "</b> sin pagar ($" + pendiente.toLocaleString() + " pendientes)";
+  el.style.display = "flex";
+  el.innerHTML = '<span style="color:#dc2626;flex-shrink:0;">' + svgIcon("alerta", 18) + '</span><span>Quedan <b>' +
+    diasRestantes + " día" + (diasRestantes === 1 ? "" : "s") + "</b> del mes y <b>" +
+    noPagaron + " alumno" + (noPagaron === 1 ? "" : "s") + "</b> sin pagar ($" + pendiente.toLocaleString() + " pendientes)</span>";
 }
 
 function generarOpcionesMes() {
@@ -515,7 +554,7 @@ function abrirModalEdicion(horario, alumno) {
   }
   select.value = horario;
   document.getElementById("input-monto").value = alumno.monto;
-  document.getElementById("modal-agregar").style.display = "flex";
+  document.getElementById("modal-agregar").classList.add("show");
   document.getElementById("input-nombre").focus();
 }
 
@@ -525,7 +564,7 @@ function cerrarModal() {
   document.getElementById("btn-guardar").textContent = "Guardar";
   document.getElementById("input-nombre").value = "";
   document.getElementById("input-monto").value = "2000";
-  document.getElementById("modal-agregar").style.display = "none";
+  document.getElementById("modal-agregar").classList.remove("show");
 }
 
 function abrirHistorial(nombre) {
@@ -553,21 +592,21 @@ function abrirHistorial(nombre) {
 
   if (!hayRegistros) lista.innerHTML = '<p class="sin-alumnos">Sin registros</p>';
   document.getElementById("historial-nombre").textContent = nombre;
-  document.getElementById("modal-historial").style.display = "flex";
+  document.getElementById("modal-historial").classList.add("show");
 }
 
 document.getElementById("btn-cerrar-historial").onclick = () => {
-  document.getElementById("modal-historial").style.display = "none";
+  document.getElementById("modal-historial").classList.remove("show");
 };
 
 document.getElementById("btn-horarios").onclick = () => {
   renderizarListaHorarios();
   document.getElementById("input-nuevo-horario").value = "";
-  document.getElementById("modal-horarios").style.display = "flex";
+  document.getElementById("modal-horarios").classList.add("show");
 };
 
 document.getElementById("btn-cerrar-horarios").onclick = () => {
-  document.getElementById("modal-horarios").style.display = "none";
+  document.getElementById("modal-horarios").classList.remove("show");
 };
 
 document.getElementById("btn-agregar-horario").onclick = () => {
@@ -629,7 +668,7 @@ document.getElementById("btn-agregar").onclick = () => {
   document.getElementById("input-monto").value = "2000";
   refrescarSelectHorario();
   document.getElementById("select-horario").value = horarios[0];
-  document.getElementById("modal-agregar").style.display = "flex";
+  document.getElementById("modal-agregar").classList.add("show");
   document.getElementById("input-nombre").focus();
 };
 
