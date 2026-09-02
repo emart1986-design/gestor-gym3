@@ -21,7 +21,7 @@
     .header h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
     .header p { margin: 2px 0 0; font-size: 12px; color: #6b7280; }
     .mes-selector { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 8px; align-items: center; box-shadow: var(--shadow-card); position: sticky; top: env(safe-area-inset-top); z-index: 50; }
-    .mes-selector button { padding: 10px 14px; background: white; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 14px; cursor: pointer; color: #000000; font-weight: 600; transition: background-color .15s ease; }
+    .mes-selector button { padding: 10px 14px; background: white; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 14px; cursor: pointer; color: #000000; font-weight: 600; transition: background-color .15s ease, transform .1s ease; }
     .mes-selector select { flex: 1; padding: 12px; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 16px; font-weight: 700; background: white; color: #000000; }
     .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1.5rem; }
     .stat-card { background: white; border: 0.5px solid #e5e7eb; border-radius: 8px; padding: 1rem; text-align: center; box-shadow: var(--shadow-card); }
@@ -40,13 +40,13 @@
     .buscador { width: 100%; padding: 12px 12px 12px 38px; border: 0.5px solid #e5e7eb; border-radius: 8px; font-size: 15px; background: white; box-shadow: var(--shadow-card); }
     .recordatorio { background: white; border: 2px solid #000000; border-radius: 8px; padding: 12px 14px; margin-bottom: 1.5rem; font-size: 13px; font-weight: 600; color: #000000; box-shadow: var(--shadow-card); display: flex; align-items: center; gap: 8px; }
     .recordatorio b { color: #dc2626; }
-    .btn-toggle { width: 100%; padding: 10px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 13px; font-weight: 600; color: #000000; cursor: pointer; margin-bottom: 1rem; transition: background-color .15s ease, color .15s ease; }
+    .btn-toggle { width: 100%; padding: 10px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 13px; font-weight: 600; color: #000000; cursor: pointer; margin-bottom: 1rem; transition: background-color .15s ease, color .15s ease, transform .1s ease; }
     .btn-toggle.activo { background: #000000; color: white; border-color: #000000; }
     .alumno-riesgo { background: #fef2f2; margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; transition: background-color .15s ease; }
     .acciones { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
-    .btn-accion { flex: 1 1 30%; padding: 10px 6px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 12px; font-weight: 600; color: #000000; cursor: pointer; box-shadow: var(--shadow-card); display: flex; align-items: center; justify-content: center; gap: 5px; }
-    .btn-edit { margin-left: 10px; background: #f0f0f0; border: none; color: #000000; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background-color .15s ease; }
-    .btn-hist { margin-left: 10px; background: #f3f4f6; border: none; color: #000000; cursor: pointer; font-size: 15px; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background-color .15s ease; }
+    .btn-accion { flex: 1 1 30%; padding: 10px 6px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 12px; font-weight: 600; color: #000000; cursor: pointer; box-shadow: var(--shadow-card); display: flex; align-items: center; justify-content: center; gap: 5px; transition: transform .1s ease; }
+    .btn-edit { margin-left: 10px; background: #f0f0f0; border: none; color: #000000; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background-color .15s ease, transform .1s ease; }
+    .btn-hist { margin-left: 10px; background: #f3f4f6; border: none; color: #000000; cursor: pointer; font-size: 15px; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background-color .15s ease, transform .1s ease; }
     .historial-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid #f3f4f6; font-size: 14px; }
     .historial-item:last-child { border-bottom: none; }
     .historial-pagado { color: #059669; font-weight: 700; }
@@ -62,13 +62,15 @@
     .horario-content { padding: 0.5rem 1rem; background: white; }
     .alumno-fila { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 0.5px solid #f3f4f6; }
     .alumno-fila:last-child { border-bottom: none; }
-    .alumno-nombre { font-weight: 700; font-size: 17px; color: #000000; flex: 1; cursor: pointer; user-select: none; padding: 4px 0; }
+    .alumno-nombre { font-weight: 700; font-size: 17px; color: #000000; flex: 1; cursor: pointer; user-select: none; padding: 4px 0; transition: opacity .1s ease; }
     .alumno-estado { padding: 6px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; white-space: nowrap; transition: background-color .15s ease, color .15s ease; }
     .estado-pagado { background: #d1fae5; color: #059669; }
     .estado-nopagado { background: #fee2e2; color: #dc2626; }
-    .btn-delete { margin-left: 10px; background: #dc2626; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background-color .15s ease; }
-    .btn-agregar { width: 100%; padding: 14px 16px; background: #000000; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; color: white; margin-bottom: calc(1rem + env(safe-area-inset-bottom)); box-shadow: var(--shadow-card); }
-    .sin-alumnos { padding: 1rem 0; font-size: 13px; color: #9ca3af; }
+    .btn-delete { margin-left: 10px; background: #dc2626; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background-color .15s ease, transform .1s ease; }
+    .btn-agregar { width: 100%; padding: 14px 16px; background: #000000; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; color: white; margin-bottom: calc(1rem + env(safe-area-inset-bottom)); box-shadow: var(--shadow-card); transition: transform .1s ease; }
+    .sin-alumnos { padding: 2rem 0; font-size: 13px; color: #9ca3af; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    button:active { transform: scale(0.96); }
+    .alumno-nombre:active { opacity: 0.55; }
     input:focus-visible, select:focus-visible, button:focus-visible, textarea:focus-visible { outline: 2px solid #000000; outline-offset: 1px; }
     input:focus, select:focus, textarea:focus { outline: 2px solid #000000; outline-offset: 1px; }
     .modal-overlay { display: flex; visibility: hidden; opacity: 0; pointer-events: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: flex-end; justify-content: center; transition: opacity .2s ease, visibility .2s ease; }
@@ -207,7 +209,10 @@ const mesesNombre = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Set","Oct"
 
 const ICONOS_SVG = {
   documento: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
-  alerta: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+  alerta: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  buscar: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  personas: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
 };
 function svgIcon(nombre, size) {
   size = size || 14;
@@ -358,8 +363,10 @@ function renderizar(mes) {
       .filter(a => !soloPendientes || !a.pago)
       .sort((a, b) => a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" }));
     if (alumnos.length === 0) {
-      let msg = filtro ? "Sin resultados" : (soloPendientes ? "Todos pagaron ✓" : "Sin alumnos");
-      contenido.innerHTML = '<p class="sin-alumnos">' + msg + '</p>';
+      let icono = filtro ? "buscar" : (soloPendientes ? "check" : "personas");
+      let msg = filtro ? "Sin resultados" : (soloPendientes ? "Todos pagaron" : "Sin alumnos");
+      let color = soloPendientes && !filtro ? "#059669" : "#9ca3af";
+      contenido.innerHTML = '<p class="sin-alumnos"><span style="color:' + color + ';">' + svgIcon(icono, 28) + '</span>' + msg + '</p>';
     } else {
       for (let i = 0; i < alumnos.length; i++) {
         let alumno = alumnos[i];
@@ -592,7 +599,7 @@ function abrirHistorial(nombre) {
     }
   }
 
-  if (!hayRegistros) lista.innerHTML = '<p class="sin-alumnos">Sin registros</p>';
+  if (!hayRegistros) lista.innerHTML = '<p class="sin-alumnos"><span style="color:#9ca3af;">' + svgIcon("documento", 28) + '</span>Sin registros</p>';
   document.getElementById("historial-nombre").textContent = nombre;
   document.getElementById("modal-historial").classList.add("show");
 }
