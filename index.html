@@ -101,6 +101,7 @@
     </div>
 
     <div class="acciones">
+      <button class="btn-accion" id="btn-horarios">🕐 Horarios</button>
       <button class="btn-accion" id="btn-exportar">⬇️ Exportar backup</button>
       <button class="btn-accion" id="btn-importar">⬆️ Importar backup</button>
       <input type="file" id="input-importar" accept="application/json" style="display:none;">
@@ -122,12 +123,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">Horario</label>
-        <select class="form-select" id="select-horario">
-          <option value="19-20">19 a 20</option>
-          <option value="10-11">10 a 11</option>
-          <option value="20-21">20 a 21</option>
-          <option value="21-22">21 a 22</option>
-        </select>
+        <select class="form-select" id="select-horario"></select>
       </div>
       <div class="form-group">
         <label class="form-label">Monto ($)</label>
@@ -150,12 +146,50 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-horarios">
+    <div class="modal-content">
+      <h2>Horarios</h2>
+      <div class="historial-lista" id="horarios-lista"></div>
+      <div class="form-group" style="margin-top:1rem;">
+        <label class="form-label">Nuevo horario (ej: 18 a 19)</label>
+        <input type="text" class="form-input" id="input-nuevo-horario" placeholder="Ej: 18 a 19">
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-cancelar" id="btn-cerrar-horarios">Cerrar</button>
+        <button class="btn-guardar" id="btn-agregar-horario">Agregar horario</button>
+      </div>
+    </div>
+  </div>
+
   <script>
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
 
-const horarios = ["19-20","10-11","20-21","21-22"];
-const etiquetas = {"19-20":"🕐 19 a 20","10-11":"🕐 10 a 11","20-21":"🕐 20 a 21","21-22":"🕐 21 a 22"};
 const mesesNombre = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Set","Oct","Nov","Dic"];
+
+function getHorariosConfig() {
+  let h = JSON.parse(localStorage.getItem("gym_horarios") || "null");
+  if (!h) {
+    h = [
+      {id:"19-20", label:"19 a 20", activo:true},
+      {id:"10-11", label:"10 a 11", activo:true},
+      {id:"20-21", label:"20 a 21", activo:true},
+      {id:"21-22", label:"21 a 22", activo:true}
+    ];
+    localStorage.setItem("gym_horarios", JSON.stringify(h));
+  }
+  return h;
+}
+function saveHorariosConfig(h) { localStorage.setItem("gym_horarios", JSON.stringify(h)); }
+
+let horarios = [];
+let etiquetas = {};
+function cargarHorarios() {
+  let config = getHorariosConfig();
+  horarios = config.filter(h => h.activo !== false).map(h => h.id);
+  etiquetas = {};
+  for (const h of config) etiquetas[h.id] = "🕐 " + h.label;
+}
+cargarHorarios();
 
 function getMaster() {
   let m = JSON.parse(localStorage.getItem("gym_master") || "null");
@@ -181,7 +215,7 @@ function ensureMes(mes) {
   if (!data[mes]) {
     data[mes] = {};
     for (const h of horarios) {
-      data[mes][h] = master[h].map(a => ({...a, pago: false}));
+      data[mes][h] = (master[h] || []).map(a => ({...a, pago: false}));
     }
     saveData(data);
   }
@@ -191,7 +225,7 @@ function ensureMes(mes) {
 function calcTotales(mes, data) {
   let dataMes = data[mes] || {};
   let total = 0, pagaron = 0, noPagan = 0, pendiente = 0;
-  for (const h of horarios) {
+  for (const h of Object.keys(dataMes)) {
     for (const a of (dataMes[h] || [])) {
       if (a.pago) { total += a.monto; pagaron++; } else { noPagan++; pendiente += a.monto; }
     }
@@ -221,7 +255,8 @@ function dibujarGrafico() {
 
 function totalRaw(mes, data) {
   let total = 0;
-  for (const h of horarios) for (const a of ((data[mes]||{})[h]||[])) if (a.pago) total += a.monto;
+  let dataMes = data[mes] || {};
+  for (const h of Object.keys(dataMes)) for (const a of (dataMes[h] || [])) if (a.pago) total += a.monto;
   return total;
 }
 
@@ -232,11 +267,16 @@ function renderizar(mes) {
   container.innerHTML = "";
   let filtro = (document.getElementById("buscador").value || "").trim().toLowerCase();
 
-  for (const horario of horarios) {
+  let idsAMostrar = [...horarios];
+  for (const key of Object.keys(dataMes)) {
+    if (!idsAMostrar.includes(key)) idsAMostrar.push(key);
+  }
+
+  for (const horario of idsAMostrar) {
     let seccion = document.createElement("div");
     let header = document.createElement("div");
     header.className = "horario-header";
-    header.textContent = etiquetas[horario] + " (" + (dataMes[horario] || []).length + ")";
+    header.textContent = (etiquetas[horario] || ("🕐 " + horario)) + " (" + (dataMes[horario] || []).length + ")";
     seccion.appendChild(header);
 
     let contenido = document.createElement("div");
@@ -345,6 +385,48 @@ function generarOpcionesMes() {
   if (valorPrevio && [...select.options].some(o => o.value === valorPrevio)) select.value = valorPrevio;
 }
 
+function refrescarSelectHorario() {
+  let select = document.getElementById("select-horario");
+  select.innerHTML = "";
+  for (const id of horarios) {
+    let opt = document.createElement("option");
+    opt.value = id;
+    opt.textContent = etiquetas[id].replace("🕐 ", "");
+    select.appendChild(opt);
+  }
+}
+
+function renderizarListaHorarios() {
+  let config = getHorariosConfig().filter(h => h.activo !== false);
+  let lista = document.getElementById("horarios-lista");
+  lista.innerHTML = "";
+  for (const h of config) {
+    let item = document.createElement("div");
+    item.className = "historial-item";
+    let span = document.createElement("span");
+    span.textContent = h.label;
+    let btn = document.createElement("button");
+    btn.className = "btn-delete";
+    btn.style.cssText = "width:30px;height:30px;font-size:13px;";
+    btn.textContent = "✕";
+    btn.onclick = () => {
+      if (config.length <= 1) { alert("Debe quedar al menos un horario activo"); return; }
+      if (!confirm("¿Eliminar el horario \"" + h.label + "\"? Los alumnos ya cargados en meses anteriores se conservan; no se van a poder agregar mas alumnos a este horario de ahora en mas.")) return;
+      let todos = getHorariosConfig();
+      let idx = todos.findIndex(x => x.id === h.id);
+      todos[idx].activo = false;
+      saveHorariosConfig(todos);
+      cargarHorarios();
+      refrescarSelectHorario();
+      renderizarListaHorarios();
+      renderizar(mesActual);
+    };
+    item.appendChild(span);
+    item.appendChild(btn);
+    lista.appendChild(item);
+  }
+}
+
 let editando = null;
 
 function abrirModalEdicion(horario, alumno) {
@@ -352,7 +434,15 @@ function abrirModalEdicion(horario, alumno) {
   document.querySelector("#modal-agregar h2").textContent = "Editar alumno";
   document.getElementById("btn-guardar").textContent = "Guardar cambios";
   document.getElementById("input-nombre").value = alumno.nombre;
-  document.getElementById("select-horario").value = horario;
+  refrescarSelectHorario();
+  let select = document.getElementById("select-horario");
+  if (![...select.options].some(o => o.value === horario)) {
+    let opt = document.createElement("option");
+    opt.value = horario;
+    opt.textContent = (etiquetas[horario] || horario).replace("🕐 ", "") + " (inactivo)";
+    select.insertBefore(opt, select.firstChild);
+  }
+  select.value = horario;
   document.getElementById("input-monto").value = alumno.monto;
   document.getElementById("modal-agregar").style.display = "flex";
   document.getElementById("input-nombre").focus();
@@ -399,6 +489,36 @@ document.getElementById("btn-cerrar-historial").onclick = () => {
   document.getElementById("modal-historial").style.display = "none";
 };
 
+document.getElementById("btn-horarios").onclick = () => {
+  renderizarListaHorarios();
+  document.getElementById("input-nuevo-horario").value = "";
+  document.getElementById("modal-horarios").style.display = "flex";
+};
+
+document.getElementById("btn-cerrar-horarios").onclick = () => {
+  document.getElementById("modal-horarios").style.display = "none";
+};
+
+document.getElementById("btn-agregar-horario").onclick = () => {
+  let label = document.getElementById("input-nuevo-horario").value.trim();
+  if (!label) { alert("Ingresa un horario"); return; }
+  let config = getHorariosConfig();
+  let id = "h" + Date.now();
+  config.push({ id, label, activo: true });
+  saveHorariosConfig(config);
+
+  let master = getMaster();
+  master[id] = [];
+  saveMaster(master);
+
+  cargarHorarios();
+  refrescarSelectHorario();
+  renderizarListaHorarios();
+  document.getElementById("input-nuevo-horario").value = "";
+  renderizar(mesActual);
+};
+
+refrescarSelectHorario();
 generarOpcionesMes();
 let mesActual = mesActualReal();
 if (![...document.getElementById("select-mes").options].some(o => o.value === mesActual)) {
@@ -429,6 +549,7 @@ document.getElementById("btn-agregar").onclick = () => {
   document.getElementById("btn-guardar").textContent = "Guardar";
   document.getElementById("input-nombre").value = "";
   document.getElementById("input-monto").value = "2000";
+  refrescarSelectHorario();
   document.getElementById("select-horario").value = horarios[0];
   document.getElementById("modal-agregar").style.display = "flex";
   document.getElementById("input-nombre").focus();
@@ -446,9 +567,16 @@ document.getElementById("btn-guardar").onclick = () => {
   let master = getMaster();
   let data = getData();
 
+  let duplicado = (master[horario] || []).some(a =>
+    a.nombre.trim().toLowerCase() === nombre.trim().toLowerCase() &&
+    !(editando && editando.horario === horario && editando.nombre === a.nombre)
+  );
+  if (duplicado) { alert("Ya hay un alumno con ese nombre en ese horario"); return; }
+
   if (editando) {
-    let idxMaster = master[editando.horario].findIndex(a => a.nombre === editando.nombre);
+    let idxMaster = (master[editando.horario] || []).findIndex(a => a.nombre === editando.nombre);
     if (idxMaster !== -1) master[editando.horario].splice(idxMaster, 1);
+    if (!master[horario]) master[horario] = [];
     master[horario].push({ nombre, monto });
     saveMaster(master);
 
@@ -470,6 +598,7 @@ document.getElementById("btn-guardar").onclick = () => {
     }
     saveData(data);
   } else {
+    if (!master[horario]) master[horario] = [];
     master[horario].push({nombre, monto});
     saveMaster(master);
 
