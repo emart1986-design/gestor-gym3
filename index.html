@@ -256,7 +256,12 @@ function renderizar(mes) {
           let master = getMaster();
           master[horario] = master[horario].filter(a => a.nombre !== alumno.nombre);
           saveMaster(master);
-          dataMes[horario].splice(i, 1);
+
+          for (const key of Object.keys(data)) {
+            if (key >= mes && data[key][horario]) {
+              data[key][horario] = data[key][horario].filter(a => a.nombre !== alumno.nombre);
+            }
+          }
           saveData(data);
           renderizar(mes);
           calcTotales(mes, getData());
