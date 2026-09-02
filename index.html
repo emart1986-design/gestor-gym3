@@ -31,6 +31,8 @@
     .stat-nopagan { color: #dc2626; }
     .stat-pendiente { color: #4b5563; }
     .buscador { width: 100%; padding: 12px; border: 0.5px solid #e5e7eb; border-radius: 8px; font-size: 15px; margin-bottom: 1rem; background: white; }
+    .recordatorio { background: white; border: 2px solid #000000; border-radius: 8px; padding: 12px 14px; margin-bottom: 1.5rem; font-size: 13px; font-weight: 600; color: #000000; }
+    .recordatorio b { color: #dc2626; }
     .acciones { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
     .btn-accion { flex: 1 1 30%; padding: 10px 6px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 12px; font-weight: 600; color: #000000; cursor: pointer; }
     .btn-edit { margin-left: 10px; background: #f0f0f0; border: none; color: #000000; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -81,6 +83,8 @@
       <select id="select-mes"></select>
       <button id="btn-mes-sig">→</button>
     </div>
+
+    <div class="recordatorio" id="recordatorio" style="display:none;"></div>
 
     <div class="stats">
       <div class="stat-card">
@@ -288,7 +292,9 @@ function renderizar(mes) {
     let contenido = document.createElement("div");
     contenido.className = "horario-content";
 
-    let alumnos = (dataMes[horario] || []).filter(a => a.nombre.toLowerCase().includes(filtro));
+    let alumnos = (dataMes[horario] || [])
+      .filter(a => a.nombre.toLowerCase().includes(filtro))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" }));
     if (alumnos.length === 0) {
       contenido.innerHTML = '<p class="sin-alumnos">' + (filtro ? "Sin resultados" : "Sin alumnos") + '</p>';
     } else {
@@ -359,11 +365,41 @@ function renderizar(mes) {
 
   calcTotales(mes, data);
   dibujarGrafico();
+  mostrarRecordatorio();
 }
 
 function mesActualReal() {
   let d = new Date();
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+}
+
+function mostrarRecordatorio() {
+  let el = document.getElementById("recordatorio");
+  let hoy = new Date();
+  let ultimoDia = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
+  let diasRestantes = ultimoDia - hoy.getDate();
+
+  if (mesActual !== mesActualReal() || diasRestantes > 7) {
+    el.style.display = "none";
+    return;
+  }
+
+  let dataMes = getData()[mesActual] || {};
+  let noPagaron = 0, pendiente = 0;
+  for (const h of Object.keys(dataMes)) {
+    for (const a of (dataMes[h] || [])) {
+      if (!a.pago) { noPagaron++; pendiente += a.monto; }
+    }
+  }
+
+  if (noPagaron === 0) {
+    el.style.display = "none";
+    return;
+  }
+
+  el.style.display = "block";
+  el.innerHTML = "⚠️ Quedan <b>" + diasRestantes + " día" + (diasRestantes === 1 ? "" : "s") + "</b> del mes y <b>" +
+    noPagaron + " alumno" + (noPagaron === 1 ? "" : "s") + "</b> sin pagar ($" + pendiente.toLocaleString() + " pendientes)";
 }
 
 function generarOpcionesMes() {
