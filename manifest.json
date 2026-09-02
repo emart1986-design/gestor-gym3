@@ -1,34 +1,26 @@
 {
-  "name": "Gestor de Gym - Boxing",
-  "short_name": "Gestor Gym",
-  "description": "Gestiona pagos y alumnos de tu boxing gym",
+  "name": "Sauce Boxeo - Gestor de Gym",
+  "short_name": "Sauce Boxeo",
+  "description": "Gestiona pagos y alumnos de Sauce Boxeo",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#1B3A6B",
+  "theme_color": "#000000",
   "background_color": "#ffffff",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%231B3A6B' width='192' height='192'/><text x='50%' y='50%' font-size='100' fill='white' text-anchor='middle' dy='.3em'>💰</text></svg>",
+      "src": "assets/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%231B3A6B' width='512' height='512'/><text x='50%' y='50%' font-size='280' fill='white' text-anchor='middle' dy='.3em'>💰</text></svg>",
+      "src": "assets/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     }
   ],
-  "categories": ["business", "productivity"],
-  "screenshots": [
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23f5f5f5' width='540' height='720'/><rect fill='%231B3A6B' width='540' height='120'/><text x='50%' y='60' font-size='40' fill='white' text-anchor='middle' dy='.3em' font-weight='bold'>💰 Gestor de Gym</text></svg>",
-      "sizes": "540x720",
-      "type": "image/svg+xml",
-      "form_factor": "narrow"
-    }
-  ]
+  "categories": ["business", "productivity"]
 }

@@ -3,45 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#1B3A6B">
+  <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Gestor Gym">
+  <meta name="apple-mobile-web-app-title" content="Sauce Boxeo">
   <link rel="manifest" href="manifest.json">
-  <title>Gestor de Gym</title>
+  <link rel="icon" href="assets/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <title>Sauce Boxeo - Gestor de Gym</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1f2937; }
     .container { padding: 1rem; max-width: 100%; min-height: 100vh; }
-    .header { background: linear-gradient(135deg, #1B3A6B 0%, #0F2847 100%); padding: 1.5rem; border-radius: 12px; color: white; margin-bottom: 1.5rem; }
-    .header h1 { margin: 0; font-size: 24px; font-weight: 500; }
-    .header p { margin: 8px 0 0; font-size: 14px; opacity: 0.9; }
+    .header { background: white; border: 2px solid #000000; padding: 1rem 1.25rem; border-radius: 12px; color: #000000; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 14px; }
+    .header img { height: 46px; width: auto; flex-shrink: 0; }
+    .header h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
+    .header p { margin: 2px 0 0; font-size: 12px; color: #6b7280; }
     .mes-selector { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 8px; align-items: center; }
-    .mes-selector button { padding: 10px 14px; background: white; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 14px; cursor: pointer; color: #1B3A6B; font-weight: 600; }
-    .mes-selector select { flex: 1; padding: 12px; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 16px; font-weight: 700; background: white; color: #1B3A6B; }
+    .mes-selector button { padding: 10px 14px; background: white; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 14px; cursor: pointer; color: #000000; font-weight: 600; }
+    .mes-selector select { flex: 1; padding: 12px; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 16px; font-weight: 700; background: white; color: #000000; }
     .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1.5rem; }
     .stat-card { background: white; border: 0.5px solid #e5e7eb; border-radius: 8px; padding: 1rem; text-align: center; }
     .stat-card p { margin: 0; font-size: 12px; }
     .stat-value { margin: 8px 0 0 !important; font-size: 26px; font-weight: 700; }
-    .stat-total { color: #1B3A6B; }
+    .stat-total { color: #000000; }
     .stat-pagaron { color: #059669; }
     .stat-nopagan { color: #dc2626; }
-    .stat-pendiente { color: #d97706; }
+    .stat-pendiente { color: #4b5563; }
     .buscador { width: 100%; padding: 12px; border: 0.5px solid #e5e7eb; border-radius: 8px; font-size: 15px; margin-bottom: 1rem; background: white; }
     .acciones { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
-    .btn-accion { flex: 1 1 30%; padding: 10px 6px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 12px; font-weight: 600; color: #1B3A6B; cursor: pointer; }
-    .btn-edit { margin-left: 10px; background: #eef2ff; border: none; color: #1B3A6B; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .btn-hist { margin-left: 10px; background: #f3f4f6; border: none; color: #1B3A6B; cursor: pointer; font-size: 15px; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .btn-accion { flex: 1 1 30%; padding: 10px 6px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 12px; font-weight: 600; color: #000000; cursor: pointer; }
+    .btn-edit { margin-left: 10px; background: #f0f0f0; border: none; color: #000000; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .btn-hist { margin-left: 10px; background: #f3f4f6; border: none; color: #000000; cursor: pointer; font-size: 15px; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .historial-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid #f3f4f6; font-size: 14px; }
     .historial-item:last-child { border-bottom: none; }
     .historial-pagado { color: #059669; font-weight: 700; }
     .historial-nopagado { color: #dc2626; font-weight: 700; }
     .historial-lista { max-height: 50vh; overflow-y: auto; }
     .grafico { background: white; border: 0.5px solid #e5e7eb; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
-    .grafico p { margin: 0 0 1rem; font-size: 14px; font-weight: 600; color: #1B3A6B; }
+    .grafico p { margin: 0 0 1rem; font-size: 14px; font-weight: 600; color: #000000; }
     .grafico-container { height: 160px; display: flex; align-items: flex-end; gap: 8px; border-bottom: 0.5px solid #e5e7eb; padding-bottom: 1rem; }
     .horarios { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; overflow: hidden; margin-bottom: 1.5rem; }
-    .horario-header { background: #1B3A6B; color: white; padding: 1rem; font-size: 15px; font-weight: 600; }
+    .horario-header { background: #000000; color: white; padding: 1rem; font-size: 15px; font-weight: 600; }
     .horario-content { padding: 0.5rem 1rem; background: white; }
     .alumno-fila { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 0.5px solid #f3f4f6; }
     .alumno-fila:last-child { border-bottom: none; }
@@ -50,24 +53,27 @@
     .estado-pagado { background: #d1fae5; color: #059669; }
     .estado-nopagado { background: #fee2e2; color: #dc2626; }
     .btn-delete { margin-left: 10px; background: #dc2626; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .btn-agregar { width: 100%; padding: 14px 16px; background: #1B3A6B; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; color: white; margin-bottom: 1rem; }
+    .btn-agregar { width: 100%; padding: 14px 16px; background: #000000; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; color: white; margin-bottom: 1rem; }
     .sin-alumnos { padding: 1rem 0; font-size: 13px; color: #9ca3af; }
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: flex-end; justify-content: center; }
     .modal-content { background: white; border-radius: 16px 16px 0 0; padding: 2rem; width: 100%; max-width: 500px; }
-    .modal-content h2 { margin: 0 0 1.5rem; font-size: 20px; color: #1B3A6B; font-weight: 700; }
+    .modal-content h2 { margin: 0 0 1.5rem; font-size: 20px; color: #000000; font-weight: 700; }
     .form-group { margin-bottom: 1rem; }
     .form-label { display: block; font-size: 13px; color: #6b7280; margin-bottom: 6px; font-weight: 600; }
     .form-input, .form-select { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
     .modal-buttons { display: flex; gap: 10px; margin-top: 1.5rem; }
     .btn-cancelar { flex: 1; padding: 12px; background: white; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; color: #6b7280; }
-    .btn-guardar { flex: 2; padding: 12px; background: #1B3A6B; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
+    .btn-guardar { flex: 2; padding: 12px; background: #000000; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>💰 Gestor de Gym</h1>
-      <p>Historial de pagos</p>
+      <img src="assets/logo.png" alt="Sauce Boxeo">
+      <div>
+        <h1>SAUCE BOXEO</h1>
+        <p>Gestor de pagos</p>
+      </div>
     </div>
 
     <div class="mes-selector">
@@ -82,7 +88,7 @@
         <p class="stat-value stat-total" id="total-mes">$0</p>
       </div>
       <div class="stat-card">
-        <p style="color:#d97706;">Pendiente</p>
+        <p style="color:#4b5563;">Pendiente</p>
         <p class="stat-value stat-pendiente" id="pendiente-mes">$0</p>
       </div>
       <div class="stat-card">
@@ -248,7 +254,7 @@ function dibujarGrafico() {
     let [a, m] = mes.split("-");
     let col = document.createElement("div");
     col.style.cssText = "flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;";
-    col.innerHTML = `<div style="width:100%;height:${altura}px;background:#1B3A6B;border-radius:4px 4px 0 0;min-height:4px;"></div><span style="font-size:11px;color:#6b7280;font-weight:600;">${mesesNombre[parseInt(m)-1]}</span><span style="font-size:10px;color:#6b7280;">$${Math.round(total/1000)}k</span>`;
+    col.innerHTML = `<div style="width:100%;height:${altura}px;background:#000000;border-radius:4px 4px 0 0;min-height:4px;"></div><span style="font-size:11px;color:#6b7280;font-weight:600;">${mesesNombre[parseInt(m)-1]}</span><span style="font-size:10px;color:#6b7280;">$${Math.round(total/1000)}k</span>`;
     container.appendChild(col);
   }
 }
