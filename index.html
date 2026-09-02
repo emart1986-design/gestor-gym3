@@ -31,6 +31,12 @@
     .acciones { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
     .btn-accion { flex: 1 1 30%; padding: 10px 6px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 12px; font-weight: 600; color: #1B3A6B; cursor: pointer; }
     .btn-edit { margin-left: 10px; background: #eef2ff; border: none; color: #1B3A6B; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .btn-hist { margin-left: 10px; background: #f3f4f6; border: none; color: #1B3A6B; cursor: pointer; font-size: 15px; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .historial-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid #f3f4f6; font-size: 14px; }
+    .historial-item:last-child { border-bottom: none; }
+    .historial-pagado { color: #059669; font-weight: 700; }
+    .historial-nopagado { color: #dc2626; font-weight: 700; }
+    .historial-lista { max-height: 50vh; overflow-y: auto; }
     .grafico { background: white; border: 0.5px solid #e5e7eb; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
     .grafico p { margin: 0 0 1rem; font-size: 14px; font-weight: 600; color: #1B3A6B; }
     .grafico-container { height: 160px; display: flex; align-items: flex-end; gap: 8px; border-bottom: 0.5px solid #e5e7eb; padding-bottom: 1rem; }
@@ -130,6 +136,16 @@
       <div class="modal-buttons">
         <button class="btn-cancelar" id="btn-cancelar">Cancelar</button>
         <button class="btn-guardar" id="btn-guardar">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-historial">
+    <div class="modal-content">
+      <h2>Historial de <span id="historial-nombre"></span></h2>
+      <div class="historial-lista" id="historial-lista"></div>
+      <div class="modal-buttons">
+        <button class="btn-cancelar" id="btn-cerrar-historial">Cerrar</button>
       </div>
     </div>
   </div>
@@ -240,6 +256,7 @@ function renderizar(mes) {
         nombre.textContent = alumno.nombre;
         nombre.onclick = () => {
           alumno.pago = !alumno.pago;
+          alumno.fechaPago = alumno.pago ? new Date().toLocaleDateString("es-AR") : null;
           saveData(data);
           renderizar(mes);
           calcTotales(mes, getData());
@@ -249,6 +266,12 @@ function renderizar(mes) {
         let estado = document.createElement("span");
         estado.className = "alumno-estado " + (alumno.pago ? "estado-pagado" : "estado-nopagado");
         estado.textContent = alumno.pago ? "✓ $" + alumno.monto : "✗ NO PAGÓ";
+        if (alumno.pago && alumno.fechaPago) estado.title = "Pagó el " + alumno.fechaPago;
+
+        let btnHist = document.createElement("button");
+        btnHist.className = "btn-hist";
+        btnHist.textContent = "🕘";
+        btnHist.onclick = () => abrirHistorial(alumno.nombre);
 
         let btnEdit = document.createElement("button");
         btnEdit.className = "btn-edit";
@@ -278,6 +301,7 @@ function renderizar(mes) {
 
         fila.appendChild(nombre);
         fila.appendChild(estado);
+        fila.appendChild(btnHist);
         fila.appendChild(btnEdit);
         fila.appendChild(btnDel);
         contenido.appendChild(fila);
@@ -342,6 +366,38 @@ function cerrarModal() {
   document.getElementById("input-monto").value = "2000";
   document.getElementById("modal-agregar").style.display = "none";
 }
+
+function abrirHistorial(nombre) {
+  let data = getData();
+  let lista = document.getElementById("historial-lista");
+  lista.innerHTML = "";
+  let hayRegistros = false;
+
+  for (const mes of Object.keys(data).sort()) {
+    for (const h of horarios) {
+      let alumno = (data[mes][h] || []).find(a => a.nombre === nombre);
+      if (!alumno) continue;
+      hayRegistros = true;
+      let [anio, mm] = mes.split("-");
+      let item = document.createElement("div");
+      item.className = "historial-item";
+      let estadoTxt = alumno.pago
+        ? "✓ $" + alumno.monto + (alumno.fechaPago ? " · " + alumno.fechaPago : "")
+        : "✗ No pagó";
+      item.innerHTML = "<span>" + mesesNombre[parseInt(mm)-1] + " " + anio + "</span><span class=\"" +
+        (alumno.pago ? "historial-pagado" : "historial-nopagado") + "\">" + estadoTxt + "</span>";
+      lista.appendChild(item);
+    }
+  }
+
+  if (!hayRegistros) lista.innerHTML = '<p class="sin-alumnos">Sin registros</p>';
+  document.getElementById("historial-nombre").textContent = nombre;
+  document.getElementById("modal-historial").style.display = "flex";
+}
+
+document.getElementById("btn-cerrar-historial").onclick = () => {
+  document.getElementById("modal-historial").style.display = "none";
+};
 
 generarOpcionesMes();
 let mesActual = mesActualReal();
