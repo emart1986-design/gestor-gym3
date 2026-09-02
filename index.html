@@ -10,15 +10,16 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/icon-192.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
   <title>Sauce Boxeo - Gestor de Gym</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root { --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1f2937; }
-    .container { padding: 1rem; padding-top: calc(1rem + env(safe-area-inset-top)); padding-bottom: calc(1rem + env(safe-area-inset-bottom)); max-width: 100%; min-height: 100vh; }
+    .container { padding: 1rem; padding-top: calc(1rem + env(safe-area-inset-top)); padding-bottom: calc(90px + env(safe-area-inset-bottom)); max-width: 100%; min-height: 100vh; }
     .header { background: white; border: 2px solid #000000; padding: 1rem 1.25rem; border-radius: 12px; color: #000000; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-card); }
     .header img { height: 46px; width: auto; flex-shrink: 0; }
-    .header h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
+    .header h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; font-family: 'Oswald', sans-serif; text-transform: uppercase; }
     .header p { margin: 2px 0 0; font-size: 12px; color: #6b7280; }
     .mes-selector { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 8px; align-items: center; box-shadow: var(--shadow-card); position: sticky; top: env(safe-area-inset-top); z-index: 50; }
     .mes-selector button { padding: 10px 14px; background: white; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 14px; cursor: pointer; color: #000000; font-weight: 600; transition: background-color .15s ease, transform .1s ease; }
@@ -43,6 +44,7 @@
     .btn-toggle { width: 100%; padding: 10px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 13px; font-weight: 600; color: #000000; cursor: pointer; margin-bottom: 1rem; transition: background-color .15s ease, color .15s ease, transform .1s ease; }
     .btn-toggle.activo { background: #000000; color: white; border-color: #000000; }
     .alumno-riesgo { background: #fef2f2; margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; transition: background-color .15s ease; }
+    .alumno-fila:nth-child(even):not(.alumno-riesgo):not(.alumno-pausado) { background: #f9fafb; margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; }
     .acciones { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
     .btn-accion { flex: 1 1 30%; padding: 10px 6px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 12px; font-weight: 600; color: #000000; cursor: pointer; box-shadow: var(--shadow-card); display: flex; align-items: center; justify-content: center; gap: 5px; transition: transform .1s ease; }
     .btn-edit { margin-left: 10px; background: #f0f0f0; border: none; color: #000000; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background-color .15s ease, transform .1s ease; }
@@ -51,7 +53,14 @@
     .historial-item:last-child { border-bottom: none; }
     .historial-pagado { color: #059669; font-weight: 700; }
     .historial-nopagado { color: #dc2626; font-weight: 700; }
-    .historial-lista { max-height: 50vh; overflow-y: auto; }
+    .historial-lista { max-height: 50vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #000000 transparent; }
+    .historial-lista::-webkit-scrollbar { width: 6px; }
+    .historial-lista::-webkit-scrollbar-track { background: transparent; }
+    .historial-lista::-webkit-scrollbar-thumb { background: #000000; border-radius: 3px; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #000000; border-radius: 4px; }
+    html { scrollbar-width: thin; scrollbar-color: #000000 transparent; }
     .vendas-check { display: flex; align-items: center; gap: 10px; padding: 12px; background: #f9fafb; border: 0.5px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 600; color: #000000; cursor: pointer; }
     .vendas-check input { width: 18px; height: 18px; cursor: pointer; accent-color: #000000; }
     .vendas-badge { display: inline-flex; align-items: center; }
@@ -61,21 +70,36 @@
     .grafico-barra { transition: opacity .15s ease; cursor: default; }
     .grafico-barra:hover { opacity: 0.7; }
     .horarios { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; overflow: hidden; margin-bottom: 1.5rem; box-shadow: var(--shadow-card); }
-    .horario-header { background: #000000; color: white; padding: 1rem; font-size: 15px; font-weight: 600; }
+    .horario-header { background: #000000; color: white; padding: 1rem; font-size: 16px; font-weight: 600; font-family: 'Oswald', sans-serif; letter-spacing: 0.3px; text-transform: uppercase; display: flex; align-items: center; }
     .horario-content { padding: 0.5rem 1rem; background: white; }
     .alumno-fila { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 0.5px solid #f3f4f6; }
+    body.compacto .alumno-fila { padding: 6px 0; }
+    body.compacto .alumno-nombre { font-size: 14px; padding: 2px 0; }
+    body.compacto .alumno-estado { font-size: 10px; padding: 4px 6px; }
+    body.compacto .btn-edit, body.compacto .btn-hist, body.compacto .btn-delete { width: 28px; height: 28px; font-size: 12px; }
+    body.compacto .horario-header { padding: 0.6rem 1rem; font-size: 13px; }
     .alumno-fila:last-child { border-bottom: none; }
     .alumno-nombre { font-weight: 700; font-size: 17px; color: #000000; flex: 1; cursor: pointer; user-select: none; padding: 4px 0; transition: opacity .1s ease; }
     .alumno-estado { padding: 6px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; white-space: nowrap; transition: background-color .15s ease, color .15s ease; }
     .estado-pagado { background: #d1fae5; color: #059669; }
     .estado-nopagado { background: #fee2e2; color: #dc2626; }
+    .estado-pausado { background: #f3f4f6; color: #6b7280; }
+    .alumno-pausado { opacity: 0.6; }
+    .alumno-pausado .alumno-nombre { cursor: default; }
     .btn-delete { margin-left: 10px; background: #dc2626; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: 700; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background-color .15s ease, transform .1s ease; }
-    .btn-agregar { width: 100%; padding: 14px 16px; background: #000000; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; color: white; margin-bottom: calc(1rem + env(safe-area-inset-bottom)); box-shadow: var(--shadow-card); transition: transform .1s ease; }
+    .btn-agregar { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom)); width: 58px; height: 58px; border-radius: 50%; padding: 0; background: #000000; border: none; font-size: 30px; line-height: 1; font-weight: 500; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.25); transition: transform .1s ease; z-index: 60; }
+    .fila-toggles { display: flex; gap: 8px; }
+    .fila-toggles .btn-toggle { flex: 1; }
+    .filtro-horarios { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 1rem; padding-bottom: 2px; -webkit-overflow-scrolling: touch; }
+    .filtro-horarios::-webkit-scrollbar { height: 0; }
+    .chip-horario { flex-shrink: 0; padding: 8px 16px; background: white; border: 0.5px solid #d1d5db; border-radius: 20px; font-size: 13px; font-weight: 600; color: #000000; cursor: pointer; white-space: nowrap; transition: background-color .15s ease, color .15s ease, transform .1s ease; }
+    .chip-horario.activo { background: #000000; color: white; border-color: #000000; }
     .sin-alumnos { padding: 2rem 0; font-size: 13px; color: #9ca3af; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
     #splash { position: fixed; inset: 0; background: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 1; transition: opacity .35s ease; }
     #splash img { width: 55vw; max-width: 220px; animation: splash-pulse 1.1s ease-in-out infinite; }
     #splash.oculto { opacity: 0; pointer-events: none; }
     @keyframes splash-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    @keyframes caer-confeti { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(600deg); opacity: 0; } }
     button:active { transform: scale(0.96); }
     .alumno-nombre:active { opacity: 0.55; }
     input:focus-visible, select:focus-visible, button:focus-visible, textarea:focus-visible { outline: 2px solid #000000; outline-offset: 1px; }
@@ -84,7 +108,7 @@
     .modal-overlay.show { visibility: visible; opacity: 1; pointer-events: auto; }
     .modal-content { background: white; border-radius: 16px 16px 0 0; padding: 2rem; padding-bottom: calc(2rem + env(safe-area-inset-bottom)); width: 100%; max-width: 500px; transform: translateY(30px); transition: transform .25s ease; }
     .modal-overlay.show .modal-content { transform: translateY(0); }
-    .modal-content h2 { margin: 0 0 1.5rem; font-size: 20px; color: #000000; font-weight: 700; }
+    .modal-content h2 { margin: 0 0 1.5rem; font-size: 22px; color: #000000; font-weight: 700; font-family: 'Oswald', sans-serif; text-transform: uppercase; }
     .form-group { margin-bottom: 1rem; }
     .form-label { display: block; font-size: 13px; color: #6b7280; margin-bottom: 6px; font-weight: 600; }
     .form-input, .form-select { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
@@ -158,12 +182,17 @@
       <input type="text" id="buscador" class="buscador" placeholder="Buscar alumno...">
     </div>
 
-    <button class="btn-toggle" id="btn-solo-pendientes">Ver solo pendientes</button>
+    <div class="filtro-horarios" id="filtro-horarios"></div>
+
+    <div class="fila-toggles">
+      <button class="btn-toggle" id="btn-solo-pendientes">Ver solo pendientes</button>
+      <button class="btn-toggle" id="btn-vista-compacta">Vista compacta</button>
+    </div>
 
     <div class="horarios" id="horarios-container"></div>
-
-    <button class="btn-agregar" id="btn-agregar">+ Agregar alumno</button>
   </div>
+
+  <button class="btn-agregar" id="btn-agregar" title="Agregar alumno" aria-label="Agregar alumno">+</button>
 
   <div class="modal-overlay" id="modal-agregar">
     <div class="modal-content">
@@ -183,6 +212,12 @@
       <div class="form-group" id="grupo-monto-regular">
         <label class="form-label">Cuota regular desde el 2do mes ($)</label>
         <input type="number" class="form-input" id="input-monto-regular" placeholder="Igual a la matrícula">
+      </div>
+      <div class="form-group" id="grupo-pausado" style="display:none;">
+        <label class="vendas-check">
+          <input type="checkbox" id="check-pausado">
+          <span>⏸ Alumno pausado (no cuenta como pendiente ni deuda)</span>
+        </label>
       </div>
       <div class="modal-buttons">
         <button class="btn-cancelar" id="btn-cancelar">Cancelar</button>
@@ -296,13 +331,55 @@ function ensureMes(mes) {
   return data;
 }
 
+let ultimoMesCelebrado = null;
+
+function celebrarSiCorresponde(mes, porcentaje, totalAlumnos) {
+  if (porcentaje === 100 && totalAlumnos > 0) {
+    if (ultimoMesCelebrado !== mes) {
+      ultimoMesCelebrado = mes;
+      dispararConfeti();
+    }
+  } else if (ultimoMesCelebrado === mes) {
+    ultimoMesCelebrado = null;
+  }
+}
+
+function dispararConfeti() {
+  let contenedor = document.createElement("div");
+  contenedor.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden;";
+  document.body.appendChild(contenedor);
+  let colores = ["#000000", "#dc2626", "#059669", "#6b7280", "#ffffff"];
+  for (let i = 0; i < 40; i++) {
+    let pieza = document.createElement("div");
+    let color = colores[Math.floor(Math.random() * colores.length)];
+    let izquierda = Math.random() * 100;
+    let demora = Math.random() * 0.4;
+    let duracion = 1.6 + Math.random() * 0.8;
+    let tam = 6 + Math.random() * 6;
+    pieza.style.cssText = "position:absolute;top:-20px;left:" + izquierda + "%;width:" + tam + "px;height:" + (tam * 0.4) + "px;background:" + color + ";opacity:0.9;border-radius:2px;animation:caer-confeti " + duracion + "s ease-in " + demora + "s forwards;";
+    contenedor.appendChild(pieza);
+  }
+  setTimeout(() => contenedor.remove(), 2600);
+
+  let toast = document.createElement("div");
+  toast.textContent = "🎉 ¡100% cobrado este mes!";
+  toast.style.cssText = "position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:#000000;color:white;padding:10px 20px;border-radius:24px;font-weight:700;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);opacity:0;transition:opacity .3s ease;";
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => { toast.style.opacity = "1"; });
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 350);
+  }, 2500);
+}
+
 function calcTotales(mes, data) {
   let dataMes = data[mes] || {};
   let total = 0, pagaron = 0, noPagan = 0, pendiente = 0;
   for (const h of Object.keys(dataMes)) {
     for (const a of (dataMes[h] || [])) {
-      if (a.pago) { total += a.monto; pagaron++; } else { noPagan++; pendiente += a.monto; }
       if (a.vendas) total += (a.vendasMonto || PRECIO_VENDAS);
+      if (a.pausado) continue;
+      if (a.pago) { total += a.monto; pagaron++; } else { noPagan++; pendiente += a.monto; }
     }
   }
   document.getElementById("total-mes").textContent = "$" + total.toLocaleString();
@@ -314,6 +391,7 @@ function calcTotales(mes, data) {
   let porcentaje = totalAlumnos === 0 ? 0 : Math.round((pagaron / totalAlumnos) * 100);
   document.getElementById("progreso-fill").style.width = porcentaje + "%";
   document.getElementById("progreso-texto").textContent = porcentaje + "% (" + pagaron + "/" + totalAlumnos + ")";
+  celebrarSiCorresponde(mes, porcentaje, totalAlumnos);
 }
 
 function dibujarGrafico() {
@@ -338,8 +416,9 @@ function totalRaw(mes, data) {
   let total = 0;
   let dataMes = data[mes] || {};
   for (const h of Object.keys(dataMes)) for (const a of (dataMes[h] || [])) {
-    if (a.pago) total += a.monto;
     if (a.vendas) total += (a.vendasMonto || PRECIO_VENDAS);
+    if (a.pausado) continue;
+    if (a.pago) total += a.monto;
   }
   return total;
 }
@@ -354,6 +433,7 @@ function estaEnRiesgo(data, mes, horario, nombre) {
     if (!arr) break;
     let alumno = arr.find(a => a.nombre === nombre);
     if (!alumno) break;
+    if (alumno.pausado) continue;
     if (alumno.pago) break;
     streak++;
     if (streak >= 2) return true;
@@ -372,6 +452,7 @@ function renderizar(mes) {
   for (const key of Object.keys(dataMes)) {
     if (!idsAMostrar.includes(key)) idsAMostrar.push(key);
   }
+  if (filtroHorario) idsAMostrar = idsAMostrar.filter(h => h === filtroHorario);
 
   for (const horario of idsAMostrar) {
     let seccion = document.createElement("div");
@@ -385,7 +466,7 @@ function renderizar(mes) {
 
     let alumnos = (dataMes[horario] || [])
       .filter(a => a.nombre.toLowerCase().includes(filtro))
-      .filter(a => !soloPendientes || !a.pago)
+      .filter(a => !soloPendientes || (!a.pago && !a.pausado))
       .sort((a, b) => a.nombre.localeCompare(b.nombre, "es", { sensitivity: "base" }));
     if (alumnos.length === 0) {
       let icono = filtro ? "buscar" : (soloPendientes ? "check" : "personas");
@@ -397,7 +478,8 @@ function renderizar(mes) {
         let alumno = alumnos[i];
         let fila = document.createElement("div");
         fila.className = "alumno-fila";
-        if (!alumno.pago && estaEnRiesgo(data, mes, horario, alumno.nombre)) {
+        if (alumno.pausado) fila.classList.add("alumno-pausado");
+        if (!alumno.pausado && !alumno.pago && estaEnRiesgo(data, mes, horario, alumno.nombre)) {
           fila.classList.add("alumno-riesgo");
         }
 
@@ -407,19 +489,28 @@ function renderizar(mes) {
         nombre.innerHTML = (enRiesgo ? '<span style="color:#dc2626;">' + svgIcon("alerta", 14) + '</span> ' : "") + alumno.nombre +
           (alumno.vendas ? ' <span class="vendas-badge" style="color:#000000;" title="Compró vendas este mes">' + svgIcon("vendas", 13) + '</span>' : "");
         if (enRiesgo) nombre.title = "No pagó los últimos 2 meses o más";
-        nombre.onclick = () => {
-          alumno.pago = !alumno.pago;
-          alumno.fechaPago = alumno.pago ? new Date().toLocaleDateString("es-AR") : null;
-          saveData(data);
-          renderizar(mes);
-          calcTotales(mes, getData());
-          dibujarGrafico();
-        };
+        if (alumno.pausado) {
+          nombre.title = "Alumno pausado";
+        } else {
+          nombre.onclick = () => {
+            alumno.pago = !alumno.pago;
+            alumno.fechaPago = alumno.pago ? new Date().toLocaleDateString("es-AR") : null;
+            saveData(data);
+            renderizar(mes);
+            calcTotales(mes, getData());
+            dibujarGrafico();
+          };
+        }
 
         let estado = document.createElement("span");
-        estado.className = "alumno-estado " + (alumno.pago ? "estado-pagado" : "estado-nopagado");
-        estado.textContent = alumno.pago ? "✓ $" + alumno.monto : "✗ NO PAGÓ";
-        if (alumno.pago && alumno.fechaPago) estado.title = "Pagó el " + alumno.fechaPago;
+        if (alumno.pausado) {
+          estado.className = "alumno-estado estado-pausado";
+          estado.textContent = "⏸ PAUSADO";
+        } else {
+          estado.className = "alumno-estado " + (alumno.pago ? "estado-pagado" : "estado-nopagado");
+          estado.textContent = alumno.pago ? "✓ $" + alumno.monto : "✗ NO PAGÓ";
+          if (alumno.pago && alumno.fechaPago) estado.title = "Pagó el " + alumno.fechaPago;
+        }
 
         let btnHist = document.createElement("button");
         btnHist.className = "btn-hist";
@@ -540,6 +631,28 @@ function refrescarSelectHorario() {
   }
 }
 
+let filtroHorario = null;
+
+function renderizarChipsHorario() {
+  let cont = document.getElementById("filtro-horarios");
+  cont.innerHTML = "";
+  if (filtroHorario && !horarios.includes(filtroHorario)) filtroHorario = null;
+
+  let chipTodos = document.createElement("button");
+  chipTodos.className = "chip-horario" + (filtroHorario === null ? " activo" : "");
+  chipTodos.textContent = "Todos";
+  chipTodos.onclick = () => { filtroHorario = null; renderizarChipsHorario(); renderizar(mesActual); };
+  cont.appendChild(chipTodos);
+
+  for (const id of horarios) {
+    let chip = document.createElement("button");
+    chip.className = "chip-horario" + (filtroHorario === id ? " activo" : "");
+    chip.textContent = (etiquetas[id] || id).replace("🕐 ", "");
+    chip.onclick = () => { filtroHorario = id; renderizarChipsHorario(); renderizar(mesActual); };
+    cont.appendChild(chip);
+  }
+}
+
 function renderizarListaHorarios() {
   let config = getHorariosConfig().filter(h => h.activo !== false);
   let lista = document.getElementById("horarios-lista");
@@ -562,6 +675,7 @@ function renderizarListaHorarios() {
       saveHorariosConfig(todos);
       cargarHorarios();
       refrescarSelectHorario();
+      renderizarChipsHorario();
       renderizarListaHorarios();
       renderizar(mesActual);
     };
@@ -591,6 +705,8 @@ function abrirModalEdicion(horario, alumno) {
   document.getElementById("label-monto").textContent = "Monto ($)";
   document.getElementById("input-monto").value = alumno.monto;
   document.getElementById("grupo-monto-regular").style.display = "none";
+  document.getElementById("grupo-pausado").style.display = "block";
+  document.getElementById("check-pausado").checked = !!alumno.pausado;
   document.getElementById("modal-agregar").classList.add("show");
   document.getElementById("input-nombre").focus();
 }
@@ -604,6 +720,7 @@ function cerrarModal() {
   document.getElementById("input-monto").value = "2000";
   document.getElementById("input-monto-regular").value = "";
   document.getElementById("grupo-monto-regular").style.display = "block";
+  document.getElementById("grupo-pausado").style.display = "none";
   document.getElementById("modal-agregar").classList.remove("show");
 }
 
@@ -683,12 +800,14 @@ document.getElementById("btn-agregar-horario").onclick = () => {
 
   cargarHorarios();
   refrescarSelectHorario();
+  renderizarChipsHorario();
   renderizarListaHorarios();
   document.getElementById("input-nuevo-horario").value = "";
   renderizar(mesActual);
 };
 
 refrescarSelectHorario();
+renderizarChipsHorario();
 generarOpcionesMes();
 let mesActual = mesActualReal();
 if (![...document.getElementById("select-mes").options].some(o => o.value === mesActual)) {
@@ -726,8 +845,21 @@ document.getElementById("buscador").oninput = () => renderizar(mesActual);
 document.getElementById("btn-solo-pendientes").onclick = () => {
   soloPendientes = !soloPendientes;
   document.getElementById("btn-solo-pendientes").classList.toggle("activo", soloPendientes);
-  document.getElementById("btn-solo-pendientes").textContent = soloPendientes ? "✓ Viendo solo pendientes" : "Ver solo pendientes";
+  document.getElementById("btn-solo-pendientes").textContent = soloPendientes ? "✓ Solo pendientes" : "Ver solo pendientes";
   renderizar(mesActual);
+};
+
+let vistaCompacta = localStorage.getItem("gym_vista_compacta") === "true";
+document.body.classList.toggle("compacto", vistaCompacta);
+document.getElementById("btn-vista-compacta").classList.toggle("activo", vistaCompacta);
+document.getElementById("btn-vista-compacta").textContent = vistaCompacta ? "✓ Vista compacta" : "Vista compacta";
+
+document.getElementById("btn-vista-compacta").onclick = () => {
+  vistaCompacta = !vistaCompacta;
+  localStorage.setItem("gym_vista_compacta", vistaCompacta ? "true" : "false");
+  document.body.classList.toggle("compacto", vistaCompacta);
+  document.getElementById("btn-vista-compacta").classList.toggle("activo", vistaCompacta);
+  document.getElementById("btn-vista-compacta").textContent = vistaCompacta ? "✓ Vista compacta" : "Vista compacta";
 };
 
 document.getElementById("btn-agregar").onclick = () => {
@@ -739,6 +871,7 @@ document.getElementById("btn-agregar").onclick = () => {
   document.getElementById("input-monto").value = "2000";
   document.getElementById("input-monto-regular").value = "";
   document.getElementById("grupo-monto-regular").style.display = "block";
+  document.getElementById("grupo-pausado").style.display = "none";
   refrescarSelectHorario();
   document.getElementById("select-horario").value = horarios[0];
   document.getElementById("modal-agregar").classList.add("show");
@@ -766,11 +899,18 @@ document.getElementById("btn-guardar").onclick = () => {
   if (duplicado) { alert("Ya hay un alumno con ese nombre en ese horario"); return; }
 
   if (editando) {
+    let pausado = document.getElementById("check-pausado").checked;
     let idxMaster = (master[editando.horario] || []).findIndex(a => a.nombre === editando.nombre);
     if (idxMaster !== -1) master[editando.horario].splice(idxMaster, 1);
     if (!master[horario]) master[horario] = [];
-    master[horario].push({ nombre, monto });
+    master[horario].push({ nombre, monto, pausado });
     saveMaster(master);
+
+    let arrActual = data[mesActual] && data[mesActual][editando.horario];
+    if (arrActual) {
+      let idxActual = arrActual.findIndex(a => a.nombre === editando.nombre);
+      if (idxActual !== -1) arrActual[idxActual].pausado = pausado;
+    }
 
     for (const key of Object.keys(data)) {
       if (key <= mesActual) continue;
@@ -781,11 +921,12 @@ document.getElementById("btn-guardar").onclick = () => {
       if (horario === editando.horario) {
         arr[idx].nombre = nombre;
         arr[idx].monto = monto;
+        arr[idx].pausado = pausado;
       } else {
         let pago = arr[idx].pago;
         arr.splice(idx, 1);
         if (!data[key][horario]) data[key][horario] = [];
-        data[key][horario].push({ nombre, monto, pago });
+        data[key][horario].push({ nombre, monto, pago, pausado });
       }
     }
     saveData(data);
