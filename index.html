@@ -172,10 +172,6 @@
         <label class="form-label" id="label-monto">Monto ($)</label>
         <input type="number" class="form-input" id="input-monto" value="2000">
       </div>
-      <div class="form-group" id="grupo-monto-regular">
-        <label class="form-label">Cuota regular desde el 2do mes ($)</label>
-        <input type="number" class="form-input" id="input-monto-regular" placeholder="Igual a la matrícula">
-      </div>
       <div class="form-group" id="grupo-pausado" style="display:none;">
         <label class="vendas-check">
           <input type="checkbox" id="check-pausado">
@@ -233,6 +229,7 @@ const ICONOS_SVG = {
   vendas: '<path d="M20.59 13.41L13.42 20.59a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>'
 };
 const PRECIO_VENDAS = 500;
+const CUOTA_REGULAR = 1200;
 function svgIcon(nombre, size) {
   size = size || 14;
   return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;">' + ICONOS_SVG[nombre] + '</svg>';
@@ -654,7 +651,6 @@ function abrirModalEdicion(horario, alumno) {
   select.value = horario;
   document.getElementById("label-monto").textContent = "Monto ($)";
   document.getElementById("input-monto").value = alumno.monto;
-  document.getElementById("grupo-monto-regular").style.display = "none";
   document.getElementById("grupo-pausado").style.display = "block";
   document.getElementById("check-pausado").checked = !!alumno.pausado;
   document.getElementById("modal-agregar").classList.add("show");
@@ -665,11 +661,9 @@ function cerrarModal() {
   editando = null;
   document.querySelector("#modal-agregar h2").textContent = "Agregar alumno";
   document.getElementById("btn-guardar").textContent = "Guardar";
-  document.getElementById("label-monto").textContent = "Matrícula / 1er mes ($)";
+  document.getElementById("label-monto").textContent = "Matrícula / 1er mes ($) — luego $" + CUOTA_REGULAR + "/mes";
   document.getElementById("input-nombre").value = "";
   document.getElementById("input-monto").value = "2000";
-  document.getElementById("input-monto-regular").value = "";
-  document.getElementById("grupo-monto-regular").style.display = "block";
   document.getElementById("grupo-pausado").style.display = "none";
   document.getElementById("modal-agregar").classList.remove("show");
 }
@@ -802,11 +796,9 @@ document.getElementById("btn-agregar").onclick = () => {
   editando = null;
   document.querySelector("#modal-agregar h2").textContent = "Agregar alumno";
   document.getElementById("btn-guardar").textContent = "Guardar";
-  document.getElementById("label-monto").textContent = "Matrícula / 1er mes ($)";
+  document.getElementById("label-monto").textContent = "Matrícula / 1er mes ($) — luego $" + CUOTA_REGULAR + "/mes";
   document.getElementById("input-nombre").value = "";
   document.getElementById("input-monto").value = "2000";
-  document.getElementById("input-monto-regular").value = "";
-  document.getElementById("grupo-monto-regular").style.display = "block";
   document.getElementById("grupo-pausado").style.display = "none";
   refrescarSelectHorario();
   document.getElementById("select-horario").value = horarios[0];
@@ -820,8 +812,7 @@ document.getElementById("btn-guardar").onclick = () => {
   let nombre = document.getElementById("input-nombre").value.trim();
   let horario = document.getElementById("select-horario").value;
   let monto = parseInt(document.getElementById("input-monto").value) || 0;
-  let montoRegularRaw = document.getElementById("input-monto-regular").value.trim();
-  let montoRegular = montoRegularRaw ? (parseInt(montoRegularRaw) || 0) : monto;
+  let montoRegular = CUOTA_REGULAR;
 
   if (!nombre) { alert("Ingresa el nombre"); return; }
 
