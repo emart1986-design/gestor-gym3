@@ -23,7 +23,8 @@
     .mes-selector button { padding: 10px 14px; background: white; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 14px; cursor: pointer; color: #000000; font-weight: 600; transition: background-color .15s ease, transform .1s ease; }
     .mes-selector select { flex: 1; padding: 12px; border: 0.5px solid #d1d5db; border-radius: 6px; font-size: 16px; font-weight: 700; background: white; color: #000000; }
     .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1.5rem; }
-    .stat-card { background: white; border: 0.5px solid #e5e7eb; border-radius: 8px; padding: 1rem; text-align: center; box-shadow: var(--shadow-card); }
+    .stat-card { background: white; border: 0.5px solid #e5e7eb; border-radius: 8px; padding: 1rem; text-align: center; box-shadow: var(--shadow-card); transition: transform .1s ease; }
+    #card-no-pagan:active { transform: scale(0.96); }
     .stat-card p { margin: 0; font-size: 12px; }
     .stat-value { margin: 8px 0 0 !important; font-size: 26px; font-weight: 700; }
     .stat-total { color: #000000; }
@@ -130,7 +131,7 @@
         <p style="color:#059669;">Pagaron</p>
         <p class="stat-value stat-pagaron" id="pagaron-mes">0</p>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" id="card-no-pagan" style="cursor:pointer;">
         <p style="color:#dc2626;">No pagan</p>
         <p class="stat-value stat-nopagan" id="no-pagan-mes">0</p>
       </div>
@@ -790,6 +791,14 @@ document.getElementById("btn-solo-pendientes").onclick = () => {
   document.getElementById("btn-solo-pendientes").classList.toggle("activo", soloPendientes);
   document.getElementById("btn-solo-pendientes").textContent = soloPendientes ? "✓ Solo pendientes" : "Ver solo pendientes";
   renderizar(mesActual);
+};
+
+document.getElementById("card-no-pagan").onclick = () => {
+  soloPendientes = true;
+  document.getElementById("btn-solo-pendientes").classList.add("activo");
+  document.getElementById("btn-solo-pendientes").textContent = "✓ Solo pendientes";
+  renderizar(mesActual);
+  document.getElementById("horarios-container").scrollIntoView({ behavior: "smooth", block: "start" });
 };
 
 document.getElementById("btn-agregar").onclick = () => {
