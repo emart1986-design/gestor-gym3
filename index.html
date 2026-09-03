@@ -456,9 +456,10 @@ function renderizar(mes) {
           estado.className = "alumno-estado estado-pausado";
           estado.textContent = "⏸ PAUSADO";
         } else {
+          let montoConVendas = alumno.monto + (alumno.vendas ? (alumno.vendasMonto || PRECIO_VENDAS) : 0);
           estado.className = "alumno-estado " + (alumno.pago ? "estado-pagado" : "estado-nopagado");
-          estado.textContent = alumno.pago ? "✓ $" + alumno.monto : "✗ NO PAGÓ";
-          if (alumno.pago && alumno.fechaPago) estado.title = "Pagó el " + alumno.fechaPago;
+          estado.textContent = alumno.pago ? "✓ $" + montoConVendas : "✗ NO PAGÓ";
+          if (alumno.pago && alumno.fechaPago) estado.title = "Pagó el " + alumno.fechaPago + (alumno.vendas ? " (incluye vendas $" + (alumno.vendasMonto || PRECIO_VENDAS) + ")" : "");
         }
 
         let btnHist = document.createElement("button");
