@@ -260,6 +260,7 @@
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
 
 const mesesNombre = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Set","Oct","Nov","Dic"];
+const MES_INICIO = "2026-08";
 
 const ICONOS_SVG = {
   documento: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
@@ -626,6 +627,7 @@ function generarOpcionesMes() {
     cursor.setMonth(cursor.getMonth() + 1);
   }
   for (const m of mesesExistentes) mesesSet.add(m);
+  for (const m of [...mesesSet]) if (m < MES_INICIO) mesesSet.delete(m);
 
   let select = document.getElementById("select-mes");
   let valorPrevio = select.value;
