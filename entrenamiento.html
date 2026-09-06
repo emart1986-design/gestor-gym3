@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d0f12">
+<title>Entrenamiento Activo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,300..900;1,300..900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" />
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: '#d4ff00',
+        'primary-hover': '#bce600',
+        surface: '#0d0f12',
+        'surface-container-low': '#13161b',
+        'surface-container': '#1a1d24',
+        'surface-container-high': '#242831',
+        'outline-variant': '#2d323e',
+        'on-surface-variant': '#94a3b8',
+        accent: '#00f0ff',
+        success: '#00e676'
+      },
+      fontFamily: {
+        sans: ['Anybody', 'sans-serif'],
+        body: ['Inter', 'sans-serif']
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { background-color: #0d0f12; color: #f1f5f9; font-family: 'Anybody', sans-serif; }
+  .font-body { font-family: 'Inter', sans-serif; }
+  input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+  .modal-overlay { display: flex; visibility: hidden; opacity: 0; pointer-events: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: flex-end; justify-content: center; transition: opacity .2s ease, visibility .2s ease; }
+  .modal-overlay.show { visibility: visible; opacity: 1; pointer-events: auto; }
+  .modal-content { background: #13161b; border-radius: 16px 16px 0 0; padding: 1.5rem; padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; transform: translateY(30px); transition: transform .25s ease; }
+  .modal-overlay.show .modal-content { transform: translateY(0); }
+  .tab-view { display: none; }
+  .tab-view.activa { display: block; }
+</style>
+</head>
+<body class="bg-surface min-h-screen pb-24 antialiased selection:bg-primary selection:text-black">
+
+<header class="sticky top-0 z-40 flex items-center justify-between w-full px-4 h-16 bg-surface-container/95 backdrop-blur border-b border-outline-variant">
+  <div class="flex items-center gap-2">
+    <span class="material-symbols-outlined text-primary text-2xl">fitness_center</span>
+    <span class="font-extrabold text-lg uppercase tracking-wider text-white" id="titulo-header">ENTRENAMIENTO</span>
+  </div>
+  <button id="btn-finalizar" class="hidden bg-primary hover:bg-primary-hover text-black font-extrabold text-xs tracking-wider uppercase px-4 py-2 rounded-md transition-all active:scale-95 shadow-sm">FINALIZAR</button>
+</header>
+
+<main class="max-w-md mx-auto px-4 pt-4">
+
+  <!-- TAB: ENTRENAR -->
+  <div id="tab-entrenar" class="tab-view activa space-y-4">
+    <div id="entrenar-contenido"></div>
+  </div>
+
+  <!-- TAB: HISTORIAL -->
+  <div id="tab-historial" class="tab-view space-y-3">
+    <h1 class="text-xl font-extrabold text-white mb-1">Historial de entrenamientos</h1>
+    <div id="historial-lista-cont" class="space-y-3"></div>
+  </div>
+
+  <!-- TAB: PROGRESO -->
+  <div id="tab-progreso" class="tab-view space-y-4">
+    <h1 class="text-xl font-extrabold text-white mb-1">Progreso</h1>
+    <div class="form-group">
+      <select id="select-progreso-ejercicio" class="w-full bg-surface-container-low border border-outline-variant rounded-lg p-3 text-white font-body text-sm"></select>
+    </div>
+    <div id="progreso-lista" class="space-y-2"></div>
+  </div>
+
+  <!-- TAB: EJERCICIOS -->
+  <div id="tab-ejercicios" class="tab-view space-y-4">
+    <h1 class="text-xl font-extrabold text-white mb-1">Biblioteca de ejercicios</h1>
+    <div class="flex gap-2">
+      <input id="input-nuevo-ejercicio" type="text" placeholder="Nombre del ejercicio" class="flex-1 bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-white font-body text-sm">
+      <button id="btn-add-ejercicio-lib" class="bg-primary hover:bg-primary-hover text-black font-extrabold text-xs uppercase px-4 rounded-lg">Añadir</button>
+    </div>
+    <div id="ejercicios-lista-cont" class="space-y-2"></div>
+  </div>
+
+</main>
+
+<!-- Modal: elegir/crear rutina -->
+<div class="modal-overlay" id="modal-rutinas">
+  <div class="modal-content">
+    <h2 class="text-lg font-extrabold text-white uppercase mb-4">Nueva rutina</h2>
+    <div class="mb-3">
+      <label class="text-xs font-bold text-on-surface-variant uppercase block mb-1">Nombre de la rutina</label>
+      <input id="input-rutina-nombre" type="text" placeholder="Ej: Push Day A" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-white font-body text-sm">
+    </div>
+    <div id="rutina-ejercicios-cont" class="space-y-2 mb-3"></div>
+    <button id="btn-rutina-add-ejercicio" class="w-full py-2 border border-dashed border-outline-variant hover:border-primary/50 rounded-lg text-xs font-bold text-on-surface-variant hover:text-primary transition flex items-center justify-center gap-1 mb-3">
+      <span class="material-symbols-outlined text-sm">add</span> AÑADIR EJERCICIO A LA RUTINA
+    </button>
+    <div class="flex gap-2">
+      <button id="btn-rutina-cancelar" class="flex-1 py-3 bg-surface-container-high text-white font-bold rounded-lg text-sm">Cancelar</button>
+      <button id="btn-rutina-guardar" class="flex-[2] py-3 bg-primary text-black font-extrabold rounded-lg text-sm">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: agregar ejercicio (a rutina o a sesion activa) -->
+<div class="modal-overlay" id="modal-elegir-ejercicio">
+  <div class="modal-content">
+    <h2 class="text-lg font-extrabold text-white uppercase mb-4">Elegir ejercicio</h2>
+    <input id="input-buscar-ejercicio" type="text" placeholder="Buscar o crear ejercicio..." class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-white font-body text-sm mb-3">
+    <div id="lista-elegir-ejercicio" class="space-y-1 max-h-64 overflow-y-auto"></div>
+    <button id="btn-elegir-cancelar" class="w-full mt-4 py-3 bg-surface-container-high text-white font-bold rounded-lg text-sm">Cancelar</button>
+  </div>
+</div>
+
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-low/95 backdrop-blur border-t border-outline-variant flex justify-around items-center h-16 px-2">
+  <button data-tab="entrenar" class="tab-btn flex flex-col items-center justify-center text-primary py-1">
+    <span class="material-symbols-outlined text-xl">timer</span>
+    <span class="text-[10px] font-bold uppercase tracking-wider mt-0.5">Entrenar</span>
+  </button>
+  <button data-tab="historial" class="tab-btn flex flex-col items-center justify-center text-on-surface-variant py-1 transition">
+    <span class="material-symbols-outlined text-xl">history</span>
+    <span class="text-[10px] font-semibold uppercase tracking-wider mt-0.5">Historial</span>
+  </button>
+  <button data-tab="progreso" class="tab-btn flex flex-col items-center justify-center text-on-surface-variant py-1 transition">
+    <span class="material-symbols-outlined text-xl">monitoring</span>
+    <span class="text-[10px] font-semibold uppercase tracking-wider mt-0.5">Progreso</span>
+  </button>
+  <button data-tab="ejercicios" class="tab-btn flex flex-col items-center justify-center text-on-surface-variant py-1 transition">
+    <span class="material-symbols-outlined text-xl">fitness_center</span>
+    <span class="text-[10px] font-semibold uppercase tracking-wider mt-0.5">Ejercicios</span>
+  </button>
+</nav>
+
+<script>
+const DESCANSO_DEFAULT = 90;
+
+function getEjercicios() {
+  let e = JSON.parse(localStorage.getItem("ent_ejercicios") || "null");
+  if (!e) {
+    e = ["Press de Banca con Barra (Plano)", "Fondos en Paralelas", "Sentadilla", "Peso Muerto", "Press Militar", "Remo con Barra", "Curl con Barra", "Jalón al pecho"];
+    localStorage.setItem("ent_ejercicios", JSON.stringify(e));
+  }
+  return e;
+}
+function saveEjercicios(e) { localStorage.setItem("ent_ejercicios", JSON.stringify(e)); }
+
+function getRutinas() { return JSON.parse(localStorage.getItem("ent_rutinas") || "[]"); }
+function saveRutinas(r) { localStorage.setItem("ent_rutinas", JSON.stringify(r)); }
+
+function getSesion() { return JSON.parse(localStorage.getItem("ent_sesion") || "null"); }
+function saveSesion(s) { localStorage.setItem("ent_sesion", s ? JSON.stringify(s) : ""); if (!s) localStorage.removeItem("ent_sesion"); }
+
+function getHistorial() { return JSON.parse(localStorage.getItem("ent_historial") || "[]"); }
+function saveHistorial(h) { localStorage.setItem("ent_historial", JSON.stringify(h)); }
+
+function fmtTiempo(seg) {
+  seg = Math.max(0, Math.round(seg));
+  let m = Math.floor(seg / 60), s = seg % 60;
+  return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+}
+
+function ultimaSerieHistorial(nombreEjercicio, indiceSerie) {
+  let hist = getHistorial().slice().sort((a, b) => b.fecha.localeCompare(a.fecha));
+  for (const sesion of hist) {
+    let ej = sesion.ejercicios.find(e => e.nombre === nombreEjercicio);
+    if (ej && ej.series.length > 0) {
+      let serie = ej.series[indiceSerie] || ej.series[ej.series.length - 1];
+      return serie;
+    }
+  }
+  return null;
+}
+
+function ultimaVezEjercicio(nombreEjercicio) {
+  let hist = getHistorial().slice().sort((a, b) => b.fecha.localeCompare(a.fecha));
+  for (const sesion of hist) {
+    let ej = sesion.ejercicios.find(e => e.nombre === nombreEjercicio);
+    if (ej && ej.series.length > 0) {
+      let ultima = ej.series[ej.series.length - 1];
+      return ultima.kg + " kg × " + ultima.reps;
+    }
+  }
+  return null;
+}
+
+// ---------- Tabs ----------
+let tabActual = "entrenar";
+function cambiarTab(tab) {
+  tabActual = tab;
+  document.querySelectorAll(".tab-view").forEach(v => v.classList.remove("activa"));
+  document.getElementById("tab-" + tab).classList.add("activa");
+  document.querySelectorAll(".tab-btn").forEach(b => {
+    if (b.dataset.tab === tab) {
+      b.classList.remove("text-on-surface-variant");
+      b.classList.add("text-primary");
+    } else {
+      b.classList.remove("text-primary");
+      b.classList.add("text-on-surface-variant");
+    }
+  });
+  document.getElementById("titulo-header").textContent = tab === "entrenar" ? "ENTRENAMIENTO" : tab.toUpperCase();
+  document.getElementById("btn-finalizar").classList.toggle("hidden", !(tab === "entrenar" && getSesion()));
+  if (tab === "historial") renderHistorial();
+  if (tab === "progreso") renderProgreso();
+  if (tab === "ejercicios") renderEjercicios();
+  if (tab === "entrenar") renderEntrenar();
+}
+document.querySelectorAll(".tab-btn").forEach(b => b.onclick = () => cambiarTab(b.dataset.tab));
+
+// ---------- Cronómetro de sesión y descanso ----------
+setInterval(() => {
+  let s = getSesion();
+  if (!s) return;
+  if (tabActual === "entrenar") {
+    let elTiempo = document.getElementById("tiempo-transcurrido");
+    if (elTiempo) elTiempo.textContent = fmtTiempo((Date.now() - s.inicio) / 1000);
+
+    if (s.descanso) {
+      let restante = Math.round((s.descanso.finAt - Date.now()) / 1000);
+      if (restante <= 0) {
+        s.descanso = null;
+        saveSesion(s);
+        renderEntrenar();
+      } else {
+        let elRest = document.getElementById("descanso-restante");
+        let elBarra = document.getElementById("descanso-barra");
+        if (elRest) elRest.textContent = fmtTiempo(restante);
+        if (elBarra) elBarra.style.width = Math.max(0, Math.min(100, (restante / s.descanso.total) * 100)) + "%";
+      }
+    }
+  }
+}, 1000);
+
+// ---------- Vista ENTRENAR ----------
+function renderEntrenar() {
+  let s = getSesion();
+  document.getElementById("btn-finalizar").classList.toggle("hidden", !s);
+  let cont = document.getElementById("entrenar-contenido");
+  if (!s) {
+    cont.innerHTML = "";
+    renderInicio(cont);
+    return;
+  }
+  cont.innerHTML = "";
+
+  if (s.descanso) {
+    let restante = Math.max(0, Math.round((s.descanso.finAt - Date.now()) / 1000));
+    let pct = Math.max(0, Math.min(100, (restante / s.descanso.total) * 100));
+    let card = document.createElement("div");
+    card.className = "relative bg-surface-container rounded-xl p-4 border border-outline-variant shadow-lg overflow-hidden";
+    card.innerHTML = `
+      <div class="absolute top-0 left-0 right-0 h-1 bg-outline-variant">
+        <div id="descanso-barra" class="h-full bg-primary transition-all" style="width:${pct}%"></div>
+      </div>
+      <div class="flex items-center justify-between mt-1">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center border border-outline-variant text-primary">
+            <span class="material-symbols-outlined text-2xl">timer</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold tracking-widest text-primary uppercase">DESCANSO ACTIVO</span>
+              <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+              <span id="descanso-restante" class="text-3xl font-black tracking-tight text-white">${fmtTiempo(restante)}</span>
+              <span class="text-xs font-semibold text-on-surface-variant">/ ${fmtTiempo(s.descanso.total)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-mas30" class="bg-surface-container-high hover:bg-outline-variant text-white text-xs font-bold px-3 py-2 rounded-lg border border-outline-variant transition active:scale-95">+30s</button>
+          <button id="btn-saltar-descanso" class="bg-surface-container-high hover:bg-outline-variant text-on-surface-variant hover:text-white text-xs font-semibold px-3 py-2 rounded-lg border border-outline-variant transition active:scale-95">Saltar</button>
+        </div>
+      </div>`;
+    cont.appendChild(card);
+    card.querySelector("#btn-mas30").onclick = () => {
+      let ses = getSesion();
+      ses.descanso.finAt += 30000;
+      ses.descanso.total += 30;
+      saveSesion(ses);
+      renderEntrenar();
+    };
+    card.querySelector("#btn-saltar-descanso").onclick = () => {
+      let ses = getSesion();
+      ses.descanso = null;
+      saveSesion(ses);
+      renderEntrenar();
+    };
+  }
+
+  let header = document.createElement("div");
+  header.className = "bg-surface-container-low rounded-xl p-4 border border-outline-variant flex items-center justify-between";
+  header.innerHTML = `
+    <div>
+      <h1 class="text-xl font-extrabold tracking-tight text-white">${s.rutinaNombre}</h1>
+    </div>
+    <div class="text-right pl-3 border-l border-outline-variant">
+      <div class="flex items-center justify-end gap-1 text-accent font-bold text-sm">
+        <span class="material-symbols-outlined text-base">schedule</span>
+        <span id="tiempo-transcurrido">${fmtTiempo((Date.now() - s.inicio) / 1000)}</span>
+      </div>
+      <span class="text-[9px] font-semibold text-on-surface-variant uppercase tracking-wider block">TRANSCURRIDO</span>
+    </div>`;
+  cont.appendChild(header);
+
+  s.ejercicios.forEach((ej, idxEj) => cont.appendChild(renderEjercicioCard(s, ej, idxEj)));
+
+  let btnAdd = document.createElement("button");
+  btnAdd.className = "w-full bg-surface-container hover:bg-surface-container-high border border-outline-variant hover:border-primary text-white font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition active:scale-95 mt-1";
+  btnAdd.innerHTML = '<span class="material-symbols-outlined text-primary text-lg">add_circle</span> AÑADIR EJERCICIO';
+  btnAdd.onclick = () => abrirElegirEjercicio(nombre => {
+    let sNow = getSesion();
+    sNow.ejercicios.push({ nombre, series: [{ kg: 0, reps: 0, hecho: false }] });
+    saveSesion(sNow);
+    renderEntrenar();
+  });
+  cont.appendChild(btnAdd);
+}
+
+function renderEjercicioCard(s, ej, idxEj) {
+  let card = document.createElement("div");
+  card.className = "bg-surface-container-low rounded-xl border border-outline-variant overflow-hidden";
+
+  let ultimaVez = ultimaVezEjercicio(ej.nombre);
+  let cabecera = document.createElement("div");
+  cabecera.className = "p-4 bg-surface-container border-b border-outline-variant flex items-start justify-between";
+  cabecera.innerHTML = `
+    <div class="flex items-start gap-3">
+      <span class="w-7 h-7 rounded bg-primary text-black font-extrabold text-sm flex items-center justify-center shrink-0">${idxEj + 1}</span>
+      <div>
+        <h2 class="font-bold text-base text-white leading-tight">${ej.nombre}</h2>
+        ${ultimaVez ? `<p class="text-xs text-on-surface-variant mt-1 flex items-center gap-1.5 font-body"><span class="material-symbols-outlined text-xs">history</span> Última vez: <strong class="text-white font-sans">${ultimaVez}</strong></p>` : ""}
+      </div>
+    </div>
+    <button class="btn-quitar-ejercicio text-on-surface-variant hover:text-white p-1"><span class="material-symbols-outlined text-xl">more_vert</span></button>`;
+  cabecera.querySelector(".btn-quitar-ejercicio").onclick = () => {
+    if (!confirm("¿Quitar \"" + ej.nombre + "\" de este entrenamiento?")) return;
+    let sNow = getSesion();
+    sNow.ejercicios.splice(idxEj, 1);
+    saveSesion(sNow);
+    renderEntrenar();
+  };
+  card.appendChild(cabecera);
+
+  let cuerpo = document.createElement("div");
+  cuerpo.className = "p-3";
+  cuerpo.innerHTML = `
+    <div class="grid grid-cols-12 gap-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-2 pb-2">
+      <span class="col-span-2 text-center">SERIE</span>
+      <span class="col-span-3 text-center">ANTERIOR</span>
+      <span class="col-span-3 text-center">KG</span>
+      <span class="col-span-2 text-center">REPS</span>
+      <span class="col-span-2 text-center">CHECK</span>
+    </div>`;
+  let listaSeries = document.createElement("div");
+  listaSeries.className = "space-y-2";
+
+  ej.series.forEach((serie, idxSerie) => {
+    let anterior = ultimaSerieHistorial(ej.nombre, idxSerie);
+    let fila = document.createElement("div");
+    if (serie.hecho) {
+      fila.className = "grid grid-cols-12 gap-2 items-center bg-surface-container/50 px-2 py-2 rounded-lg border border-outline-variant/60 text-xs font-semibold";
+      fila.innerHTML = `
+        <span class="col-span-2 text-center bg-surface-container-high py-1 rounded text-on-surface-variant font-mono">${idxSerie + 1}</span>
+        <span class="col-span-3 text-center text-on-surface-variant font-body">${anterior ? anterior.kg + " kg × " + anterior.reps : "—"}</span>
+        <span class="col-span-3 text-center font-bold text-white font-mono">${serie.kg}</span>
+        <span class="col-span-2 text-center font-bold text-white font-mono">${serie.reps}</span>
+        <div class="col-span-2 flex justify-center">
+          <button class="btn-toggle-serie w-8 h-8 rounded bg-success/20 text-success border border-success/40 flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg font-bold">check</span>
+          </button>
+        </div>`;
+    } else {
+      fila.className = "grid grid-cols-12 gap-2 items-center bg-surface-container-high p-2 rounded-lg border-2 border-primary shadow-sm text-xs font-semibold";
+      fila.innerHTML = `
+        <span class="col-span-2 text-center"><span class="bg-primary text-black font-extrabold px-1.5 py-0.5 rounded text-[11px] font-mono">${idxSerie + 1}</span></span>
+        <span class="col-span-3 text-center text-on-surface-variant font-body">${anterior ? anterior.kg + " kg × " + anterior.reps : "—"}</span>
+        <div class="col-span-3">
+          <input type="number" step="0.25" class="input-kg w-full bg-surface border border-primary/50 rounded py-1 text-center font-black text-primary font-mono text-sm" value="${serie.kg}">
+        </div>
+        <div class="col-span-2">
+          <input type="number" class="input-reps w-full bg-surface border border-outline-variant rounded py-1 text-center font-black text-white font-mono text-sm" value="${serie.reps}">
+        </div>
+        <div class="col-span-2 flex justify-center">
+          <button class="btn-toggle-serie w-8 h-8 rounded bg-primary text-black flex items-center justify-center shadow-md active:scale-90 transition">
+            <span class="material-symbols-outlined text-lg font-black">check</span>
+          </button>
+        </div>`;
+
+      fila.querySelector(".input-kg").oninput = e => {
+        let sNow = getSesion();
+        sNow.ejercicios[idxEj].series[idxSerie].kg = parseFloat(e.target.value) || 0;
+        saveSesion(sNow);
+      };
+      fila.querySelector(".input-reps").oninput = e => {
+        let sNow = getSesion();
+        sNow.ejercicios[idxEj].series[idxSerie].reps = parseInt(e.target.value) || 0;
+        saveSesion(sNow);
+      };
+    }
+
+    fila.querySelector(".btn-toggle-serie").onclick = () => {
+      let sNow = getSesion();
+      let serieNow = sNow.ejercicios[idxEj].series[idxSerie];
+      serieNow.hecho = !serieNow.hecho;
+      if (serieNow.hecho) {
+        serieNow.fecha = new Date().toISOString();
+        sNow.descanso = { finAt: Date.now() + DESCANSO_DEFAULT * 1000, total: DESCANSO_DEFAULT };
+      }
+      saveSesion(sNow);
+      renderEntrenar();
+    };
+
+    listaSeries.appendChild(fila);
+  });
+
+  cuerpo.appendChild(listaSeries);
+
+  let btnAddSerie = document.createElement("button");
+  btnAddSerie.className = "w-full mt-3 py-2 border border-dashed border-outline-variant hover:border-primary/50 rounded-lg text-xs font-bold text-on-surface-variant hover:text-primary transition flex items-center justify-center gap-1";
+  btnAddSerie.innerHTML = '<span class="material-symbols-outlined text-sm">add</span> AÑADIR SERIE';
+  btnAddSerie.onclick = () => {
+    let sNow = getSesion();
+    let series = sNow.ejercicios[idxEj].series;
+    let ultima = series[series.length - 1];
+    series.push({ kg: ultima ? ultima.kg : 0, reps: ultima ? ultima.reps : 0, hecho: false });
+    saveSesion(sNow);
+    renderEntrenar();
+  };
+  cuerpo.appendChild(btnAddSerie);
+
+  card.appendChild(cuerpo);
+  return card;
+}
+
+function renderInicio(cont) {
+  let rutinas = getRutinas();
+  let wrap = document.createElement("div");
+  wrap.className = "space-y-3";
+
+  let titulo = document.createElement("h1");
+  titulo.className = "text-xl font-extrabold text-white mb-1";
+  titulo.textContent = "Elegí una rutina";
+  wrap.appendChild(titulo);
+
+  if (rutinas.length === 0) {
+    let vacio = document.createElement("p");
+    vacio.className = "text-sm text-on-surface-variant font-body";
+    vacio.textContent = "Todavía no creaste ninguna rutina.";
+    wrap.appendChild(vacio);
+  }
+
+  rutinas.forEach(r => {
+    let card = document.createElement("div");
+    card.className = "bg-surface-container-low rounded-xl border border-outline-variant p-4 flex items-center justify-between";
+    card.innerHTML = `
+      <div>
+        <h2 class="font-bold text-base text-white">${r.nombre}</h2>
+        <p class="text-xs text-on-surface-variant font-body mt-1">${r.ejercicios.length} ejercicio(s)</p>
+      </div>`;
+    let btnGrp = document.createElement("div");
+    btnGrp.className = "flex items-center gap-2";
+    let btnIniciar = document.createElement("button");
+    btnIniciar.className = "bg-primary hover:bg-primary-hover text-black font-extrabold text-xs px-4 py-2 rounded-lg";
+    btnIniciar.textContent = "Iniciar";
+    btnIniciar.onclick = () => iniciarSesion(r);
+    let btnBorrar = document.createElement("button");
+    btnBorrar.className = "text-on-surface-variant hover:text-white p-1";
+    btnBorrar.innerHTML = '<span class="material-symbols-outlined text-xl">delete</span>';
+    btnBorrar.onclick = () => {
+      if (!confirm("¿Eliminar la rutina \"" + r.nombre + "\"?")) return;
+      saveRutinas(getRutinas().filter(x => x.id !== r.id));
+      renderEntrenar();
+    };
+    btnGrp.appendChild(btnIniciar);
+    btnGrp.appendChild(btnBorrar);
+    card.appendChild(btnGrp);
+    wrap.appendChild(card);
+  });
+
+  let btnLibre = document.createElement("button");
+  btnLibre.className = "w-full bg-surface-container hover:bg-surface-container-high border border-outline-variant text-white font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition active:scale-95";
+  btnLibre.innerHTML = '<span class="material-symbols-outlined text-primary text-lg">bolt</span> ENTRENAMIENTO LIBRE';
+  btnLibre.onclick = () => iniciarSesion({ nombre: "Entrenamiento libre", ejercicios: [] });
+  wrap.appendChild(btnLibre);
+
+  let btnNueva = document.createElement("button");
+  btnNueva.className = "w-full bg-surface-container hover:bg-surface-container-high border border-outline-variant hover:border-primary text-white font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition active:scale-95";
+  btnNueva.innerHTML = '<span class="material-symbols-outlined text-primary text-lg">add_circle</span> NUEVA RUTINA';
+  btnNueva.onclick = () => abrirModalRutina();
+  wrap.appendChild(btnNueva);
+
+  cont.appendChild(wrap);
+}
+
+function iniciarSesion(rutina) {
+  let sesion = {
+    rutinaNombre: rutina.nombre,
+    inicio: Date.now(),
+    descanso: null,
+    ejercicios: rutina.ejercicios.map(e => ({
+      nombre: e.nombre,
+      series: Array.from({ length: e.seriesObjetivo || 1 }, () => ({ kg: 0, reps: e.repsObjetivo || 0, hecho: false }))
+    }))
+  };
+  saveSesion(sesion);
+  renderEntrenar();
+}
+
+document.getElementById("btn-finalizar").onclick = () => {
+  let s = getSesion();
+  if (!s) return;
+  if (!confirm("¿Finalizar y guardar este entrenamiento?")) return;
+  let historial = getHistorial();
+  historial.push({
+    id: "s" + Date.now(),
+    rutinaNombre: s.rutinaNombre,
+    fecha: new Date().toISOString(),
+    duracionSeg: Math.round((Date.now() - s.inicio) / 1000),
+    ejercicios: s.ejercicios
+      .map(e => ({ nombre: e.nombre, series: e.series.filter(x => x.hecho).map(x => ({ kg: x.kg, reps: x.reps })) }))
+      .filter(e => e.series.length > 0)
+  });
+  saveHistorial(historial);
+  saveSesion(null);
+  renderEntrenar();
+};
+
+// ---------- Modal: crear rutina ----------
+let rutinaEnEdicion = null;
+function abrirModalRutina() {
+  rutinaEnEdicion = { nombre: "", ejercicios: [] };
+  document.getElementById("input-rutina-nombre").value = "";
+  renderRutinaEjerciciosModal();
+  document.getElementById("modal-rutinas").classList.add("show");
+}
+function renderRutinaEjerciciosModal() {
+  let cont = document.getElementById("rutina-ejercicios-cont");
+  cont.innerHTML = "";
+  rutinaEnEdicion.ejercicios.forEach((e, idx) => {
+    let fila = document.createElement("div");
+    fila.className = "flex items-center gap-2 bg-surface-container-high rounded-lg p-2";
+    fila.innerHTML = `
+      <span class="flex-1 text-sm text-white font-body">${e.nombre}</span>
+      <input type="number" min="1" value="${e.seriesObjetivo}" class="w-14 bg-surface border border-outline-variant rounded py-1 text-center text-white text-xs" title="Series">
+      <span class="text-on-surface-variant text-xs">×</span>
+      <input type="number" min="1" value="${e.repsObjetivo}" class="w-14 bg-surface border border-outline-variant rounded py-1 text-center text-white text-xs" title="Reps">
+      <button class="text-on-surface-variant hover:text-white"><span class="material-symbols-outlined text-lg">close</span></button>`;
+    let inputs = fila.querySelectorAll("input");
+    inputs[0].oninput = ev => { rutinaEnEdicion.ejercicios[idx].seriesObjetivo = parseInt(ev.target.value) || 1; };
+    inputs[1].oninput = ev => { rutinaEnEdicion.ejercicios[idx].repsObjetivo = parseInt(ev.target.value) || 0; };
+    fila.querySelector("button").onclick = () => {
+      rutinaEnEdicion.ejercicios.splice(idx, 1);
+      renderRutinaEjerciciosModal();
+    };
+    cont.appendChild(fila);
+  });
+}
+document.getElementById("btn-rutina-add-ejercicio").onclick = () => {
+  abrirElegirEjercicio(nombre => {
+    rutinaEnEdicion.ejercicios.push({ nombre, seriesObjetivo: 3, repsObjetivo: 10 });
+    renderRutinaEjerciciosModal();
+  });
+};
+document.getElementById("btn-rutina-cancelar").onclick = () => {
+  document.getElementById("modal-rutinas").classList.remove("show");
+};
+document.getElementById("btn-rutina-guardar").onclick = () => {
+  let nombre = document.getElementById("input-rutina-nombre").value.trim();
+  if (!nombre) { alert("Ingresá un nombre para la rutina"); return; }
+  if (rutinaEnEdicion.ejercicios.length === 0) { alert("Agregá al menos un ejercicio"); return; }
+  let rutinas = getRutinas();
+  rutinas.push({ id: "r" + Date.now(), nombre, ejercicios: rutinaEnEdicion.ejercicios });
+  saveRutinas(rutinas);
+  document.getElementById("modal-rutinas").classList.remove("show");
+  renderEntrenar();
+};
+
+// ---------- Modal: elegir ejercicio (compartido) ----------
+let onElegirEjercicio = null;
+function abrirElegirEjercicio(callback) {
+  onElegirEjercicio = callback;
+  document.getElementById("input-buscar-ejercicio").value = "";
+  renderListaElegirEjercicio("");
+  document.getElementById("modal-elegir-ejercicio").classList.add("show");
+  document.getElementById("input-buscar-ejercicio").focus();
+}
+function renderListaElegirEjercicio(filtro) {
+  let cont = document.getElementById("lista-elegir-ejercicio");
+  cont.innerHTML = "";
+  let ejercicios = getEjercicios().filter(e => e.toLowerCase().includes(filtro.toLowerCase()));
+  ejercicios.sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+  ejercicios.forEach(nombre => {
+    let btn = document.createElement("button");
+    btn.className = "w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container-high text-white text-sm font-body";
+    btn.textContent = nombre;
+    btn.onclick = () => {
+      document.getElementById("modal-elegir-ejercicio").classList.remove("show");
+      if (onElegirEjercicio) onElegirEjercicio(nombre);
+    };
+    cont.appendChild(btn);
+  });
+  if (filtro.trim() && !getEjercicios().some(e => e.toLowerCase() === filtro.trim().toLowerCase())) {
+    let btnCrear = document.createElement("button");
+    btnCrear.className = "w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container-high text-primary text-sm font-bold font-body flex items-center gap-1";
+    btnCrear.innerHTML = '<span class="material-symbols-outlined text-base">add</span> Crear "' + filtro.trim() + '"';
+    btnCrear.onclick = () => {
+      let libreria = getEjercicios();
+      libreria.push(filtro.trim());
+      saveEjercicios(libreria);
+      document.getElementById("modal-elegir-ejercicio").classList.remove("show");
+      if (onElegirEjercicio) onElegirEjercicio(filtro.trim());
+    };
+    cont.appendChild(btnCrear);
+  }
+}
+document.getElementById("input-buscar-ejercicio").oninput = e => renderListaElegirEjercicio(e.target.value);
+document.getElementById("btn-elegir-cancelar").onclick = () => {
+  document.getElementById("modal-elegir-ejercicio").classList.remove("show");
+};
+
+// ---------- Vista HISTORIAL ----------
+function renderHistorial() {
+  let cont = document.getElementById("historial-lista-cont");
+  cont.innerHTML = "";
+  let hist = getHistorial().slice().sort((a, b) => b.fecha.localeCompare(a.fecha));
+  if (hist.length === 0) {
+    cont.innerHTML = '<p class="text-sm text-on-surface-variant font-body">Todavía no hay entrenamientos guardados.</p>';
+    return;
+  }
+  hist.forEach(sesion => {
+    let card = document.createElement("div");
+    card.className = "bg-surface-container-low rounded-xl border border-outline-variant p-4";
+    let fecha = new Date(sesion.fecha);
+    let totalSeries = sesion.ejercicios.reduce((acc, e) => acc + e.series.length, 0);
+    card.innerHTML = `
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="font-bold text-white text-base">${sesion.rutinaNombre}</h2>
+        <span class="text-xs text-on-surface-variant font-body">${fecha.toLocaleDateString("es-AR")}</span>
+      </div>
+      <div class="flex items-center gap-4 text-xs text-on-surface-variant font-body mb-2">
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span>${fmtTiempo(sesion.duracionSeg)}</span>
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">list</span>${totalSeries} series</span>
+      </div>`;
+    let detalle = document.createElement("div");
+    detalle.className = "space-y-1 pt-2 border-t border-outline-variant/60";
+    sesion.ejercicios.forEach(e => {
+      let linea = document.createElement("p");
+      linea.className = "text-xs text-white font-body";
+      linea.innerHTML = '<strong>' + e.nombre + '</strong>: ' + e.series.map(s => s.kg + "kg×" + s.reps).join(", ");
+      detalle.appendChild(linea);
+    });
+    card.appendChild(detalle);
+    cont.appendChild(card);
+  });
+}
+
+// ---------- Vista PROGRESO ----------
+function renderProgreso() {
+  let select = document.getElementById("select-progreso-ejercicio");
+  let hist = getHistorial();
+  let nombres = [...new Set(hist.flatMap(s => s.ejercicios.map(e => e.nombre)))].sort((a, b) => a.localeCompare(b, "es"));
+  let valorPrevio = select.value;
+  select.innerHTML = "";
+  if (nombres.length === 0) {
+    select.innerHTML = '<option value="">Sin datos todavía</option>';
+    document.getElementById("progreso-lista").innerHTML = '<p class="text-sm text-on-surface-variant font-body">Completá entrenamientos para ver tu progreso acá.</p>';
+    return;
+  }
+  nombres.forEach(n => {
+    let opt = document.createElement("option");
+    opt.value = n;
+    opt.textContent = n;
+    select.appendChild(opt);
+  });
+  if (nombres.includes(valorPrevio)) select.value = valorPrevio;
+  renderProgresoLista(select.value);
+  select.onchange = () => renderProgresoLista(select.value);
+}
+function renderProgresoLista(nombreEjercicio) {
+  let cont = document.getElementById("progreso-lista");
+  cont.innerHTML = "";
+  let hist = getHistorial()
+    .filter(s => s.ejercicios.some(e => e.nombre === nombreEjercicio))
+    .sort((a, b) => a.fecha.localeCompare(b.fecha));
+  if (hist.length === 0) return;
+  let maxKgGlobal = Math.max(...hist.flatMap(s => s.ejercicios.find(e => e.nombre === nombreEjercicio).series.map(x => x.kg)), 1);
+  hist.forEach(s => {
+    let ej = s.ejercicios.find(e => e.nombre === nombreEjercicio);
+    let mejorSerie = ej.series.reduce((max, x) => x.kg > max.kg ? x : max, ej.series[0]);
+    let pct = Math.max(4, (mejorSerie.kg / maxKgGlobal) * 100);
+    let fila = document.createElement("div");
+    fila.className = "bg-surface-container-low rounded-lg p-3 border border-outline-variant";
+    fila.innerHTML = `
+      <div class="flex items-center justify-between text-xs font-body text-on-surface-variant mb-1">
+        <span>${new Date(s.fecha).toLocaleDateString("es-AR")}</span>
+        <span class="text-white font-bold">${mejorSerie.kg} kg × ${mejorSerie.reps}</span>
+      </div>
+      <div class="h-2 rounded bg-surface-container-high overflow-hidden">
+        <div class="h-full bg-primary" style="width:${pct}%"></div>
+      </div>`;
+    cont.appendChild(fila);
+  });
+}
+
+// ---------- Vista EJERCICIOS ----------
+function renderEjercicios() {
+  let cont = document.getElementById("ejercicios-lista-cont");
+  cont.innerHTML = "";
+  let ejercicios = getEjercicios().slice().sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+  ejercicios.forEach(nombre => {
+    let fila = document.createElement("div");
+    fila.className = "flex items-center justify-between bg-surface-container-low rounded-lg p-3 border border-outline-variant";
+    fila.innerHTML = `<span class="text-sm text-white font-body">${nombre}</span>`;
+    let btn = document.createElement("button");
+    btn.className = "text-on-surface-variant hover:text-white";
+    btn.innerHTML = '<span class="material-symbols-outlined text-lg">delete</span>';
+    btn.onclick = () => {
+      if (!confirm("¿Eliminar \"" + nombre + "\" de la biblioteca?")) return;
+      saveEjercicios(getEjercicios().filter(e => e !== nombre));
+      renderEjercicios();
+    };
+    fila.appendChild(btn);
+    cont.appendChild(fila);
+  });
+}
+document.getElementById("btn-add-ejercicio-lib").onclick = () => {
+  let input = document.getElementById("input-nuevo-ejercicio");
+  let nombre = input.value.trim();
+  if (!nombre) return;
+  let ejercicios = getEjercicios();
+  if (ejercicios.some(e => e.toLowerCase() === nombre.toLowerCase())) { alert("Ese ejercicio ya existe"); return; }
+  ejercicios.push(nombre);
+  saveEjercicios(ejercicios);
+  input.value = "";
+  renderEjercicios();
+};
+
+// ---------- Init ----------
+renderEntrenar();
+</script>
+</body>
+</html>
