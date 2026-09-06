@@ -8,7 +8,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,300..900;1,300..900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anybody:ital,wght@0,300..900;1,300..900&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" />
 <script>
 tailwind.config = {
@@ -25,11 +25,18 @@ tailwind.config = {
         'outline-variant': '#2d323e',
         'on-surface-variant': '#94a3b8',
         accent: '#00f0ff',
-        success: '#00e676'
+        success: '#00e676',
+        'primary-container': '#c3f400',
+        'on-primary-fixed': '#161e00',
+        'secondary-container': '#ff5708',
+        'surface-variant': '#34343b',
+        'surface-container-lowest': '#0e0e14'
       },
       fontFamily: {
         sans: ['Anybody', 'sans-serif'],
-        body: ['Inter', 'sans-serif']
+        body: ['Inter', 'sans-serif'],
+        display: ['Space Grotesk', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace']
       }
     }
   }
@@ -46,6 +53,9 @@ tailwind.config = {
   .modal-overlay.show .modal-content { transform: translateY(0); }
   .tab-view { display: none; }
   .tab-view.activa { display: block; }
+  .circular-progress { transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.5s ease-in-out; }
+  .vista-full { display: flex; visibility: hidden; opacity: 0; pointer-events: none; position: fixed; inset: 0; z-index: 1100; background: #0e0e14; transition: opacity .2s ease, visibility .2s ease; overflow-y: auto; }
+  .vista-full.show { visibility: visible; opacity: 1; pointer-events: auto; }
 </style>
 </head>
 <body class="bg-surface min-h-screen pb-24 antialiased selection:bg-primary selection:text-black">
@@ -121,6 +131,171 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- Vista ampliada del cronómetro de descanso -->
+<div id="vista-descanso" class="vista-full">
+  <div class="max-w-lg mx-auto w-full flex flex-col pb-32">
+    <header class="w-full bg-surface-container px-4 py-3 flex flex-col gap-2 sticky top-0 z-10 border-b border-outline-variant/40">
+      <div class="flex items-center justify-between">
+        <button id="btn-volver-descanso" class="flex items-center gap-1 text-primary-container hover:text-white transition-colors py-1 pr-2 active:scale-[0.98]">
+          <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+          <span class="font-display text-[11px] font-semibold tracking-wide uppercase">Volver al entrenamiento</span>
+        </button>
+        <div class="flex items-center gap-1 px-2 py-0.5 bg-primary-container/10 border border-primary-container rounded">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-ping"></span>
+          <span id="descanso-badge-serie" class="font-mono text-[11px] tracking-wide text-primary-container">SERIE 1 / 1</span>
+        </div>
+      </div>
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="font-mono text-[11px] text-on-surface-variant block uppercase tracking-wider">MÓDULO DE RECUPERACIÓN</span>
+          <h1 class="font-display text-2xl font-bold text-white tracking-tight uppercase">CRONÓMETRO DE DESCANSO</h1>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 px-4 flex flex-col items-center gap-5 pt-4">
+      <section class="w-full flex flex-col items-center justify-center relative py-2">
+        <div class="relative w-72 h-72 flex items-center justify-center">
+          <svg class="w-full h-full" viewBox="0 0 260 260">
+            <circle cx="130" cy="130" fill="none" opacity="0.6" r="118" stroke="#1f1f25" stroke-dasharray="4 6" stroke-width="2"></circle>
+            <circle cx="130" cy="130" fill="#161620" r="106" stroke="#262636" stroke-width="12"></circle>
+            <circle id="dial-descanso" class="circular-progress transition-all duration-300" cx="130" cy="130" fill="transparent" r="106" stroke="#c3f400" stroke-dasharray="665.9" stroke-dashoffset="0" stroke-linecap="round" stroke-width="12"></circle>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none">
+            <span class="font-mono text-[11px] text-primary-container tracking-widest uppercase mb-1">TIEMPO RESTANTE</span>
+            <div id="descanso-full-tiempo" class="font-mono text-[56px] leading-none font-bold text-white tracking-tighter">01:45</div>
+            <div class="mt-2 flex items-center gap-1 bg-surface-container-high/80 px-2 py-0.5 rounded border border-outline-variant/30">
+              <span class="font-mono text-[11px] text-on-surface-variant">META</span>
+              <span id="descanso-full-meta" class="font-mono text-[11px] font-bold text-white">02:00</span>
+            </div>
+            <span id="descanso-full-estado" class="font-mono text-[10px] text-primary-container font-semibold mt-2 tracking-widest flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span> EN CURSO
+            </span>
+          </div>
+        </div>
+
+        <div class="w-full max-w-sm grid grid-cols-4 gap-2 mt-3 items-center">
+          <button id="btn-full-mas30" class="h-14 bg-surface-container border border-outline-variant hover:border-primary-container text-white flex flex-col items-center justify-center rounded-xl active:scale-[0.96] transition-all" title="Añadir 30 segundos">
+            <span class="font-mono text-primary-container font-bold text-[18px]">+30</span>
+            <span class="font-mono text-[10px] text-on-surface-variant uppercase">seg</span>
+          </button>
+          <button id="btn-full-pausar" class="col-span-2 h-14 bg-primary-container text-on-primary-fixed hover:brightness-105 active:scale-[0.98] font-display font-bold rounded-xl flex items-center justify-center gap-2 shadow-[0px_0px_20px_rgba(195,244,0,0.25)] transition-all">
+            <span id="icono-pausar" class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">pause</span>
+            <span id="texto-pausar" class="font-display text-base uppercase tracking-tight">PAUSAR</span>
+          </button>
+          <button id="btn-full-reset" class="h-14 bg-surface-container border border-outline-variant hover:border-secondary-container text-on-surface-variant hover:text-white flex flex-col items-center justify-center rounded-xl active:scale-[0.96] transition-all" title="Reiniciar cronómetro">
+            <span class="material-symbols-outlined text-[22px]">restart_alt</span>
+            <span class="font-mono text-[10px] uppercase">Reset</span>
+          </button>
+        </div>
+        <button id="btn-full-saltar" class="mt-2 text-on-surface-variant hover:text-secondary-container active:scale-[0.98] transition-colors py-1 px-4 flex items-center gap-1">
+          <span class="font-mono text-[12px] font-semibold uppercase tracking-wider">Saltar descanso ahora</span>
+          <span class="material-symbols-outlined text-[18px]">fast_forward</span>
+        </button>
+      </section>
+
+      <section class="w-full flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <label class="font-mono text-[11px] text-on-surface-variant uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-primary-container">tune</span>
+            PREAJUSTES DE ENTRENAMIENTO
+          </label>
+          <span id="preset-activo-label" class="font-mono text-[10px] text-primary-container">AJUSTE ACTIVO: 2:00</span>
+        </div>
+        <div id="presets-descanso-cont" class="grid grid-cols-2 gap-2"></div>
+      </section>
+
+      <section id="siguiente-set-card" class="w-full bg-surface-container border border-outline-variant rounded-xl p-4 flex flex-col gap-2 relative overflow-hidden">
+        <div class="w-1 absolute top-0 left-0 bottom-0 bg-primary-container"></div>
+        <div class="flex items-center justify-between pl-1">
+          <span class="font-mono text-[11px] text-primary-container uppercase font-bold tracking-wider flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">bolt</span>
+            A CONTINUACIÓN EN TU SESIÓN
+          </span>
+        </div>
+        <div id="siguiente-set-contenido" class="flex items-end justify-between pl-1 mt-1"></div>
+      </section>
+
+      <section class="w-full bg-surface-container border border-outline-variant rounded-xl p-4 flex flex-col gap-4">
+        <div class="flex items-center justify-between pb-2 border-b border-surface-variant">
+          <span class="font-display text-sm font-bold text-white uppercase flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary-container text-[20px]">notifications_active</span>
+            ALERTAS DE DESCANSO
+          </span>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary-container">
+                <span class="material-symbols-outlined text-[20px]">volume_up</span>
+              </div>
+              <div>
+                <span class="font-display text-sm font-bold text-white block">Alerta Sonora</span>
+                <span class="font-body text-[12px] text-on-surface-variant">Avisar al completar el tiempo</span>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="toggle-sonido" type="checkbox" class="sr-only peer">
+              <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-container-lowest after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+            </label>
+          </div>
+          <div id="tipos-sonido-cont" class="grid grid-cols-3 gap-2 mt-1"></div>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="material-symbols-outlined text-[18px] text-on-surface-variant">volume_mute</span>
+            <input id="slider-volumen" type="range" min="0" max="100" value="85" class="w-full h-1.5 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary-container">
+            <span class="material-symbols-outlined text-[18px] text-primary-container">volume_up</span>
+            <span id="volumen-label" class="font-mono text-[11px] text-on-surface-variant font-bold w-8 text-right">85%</span>
+          </div>
+        </div>
+
+        <div class="h-px w-full bg-surface-variant/60"></div>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary-container">
+              <span class="material-symbols-outlined text-[20px]">vibration</span>
+            </div>
+            <div>
+              <span class="font-display text-sm font-bold text-white block">Vibración / Háptica</span>
+              <span class="font-body text-[12px] text-on-surface-variant">Cuenta regresiva táctil últimos 5s</span>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input id="toggle-vibracion" type="checkbox" class="sr-only peer">
+            <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-container-lowest after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+          </label>
+        </div>
+
+        <div class="h-px w-full bg-surface-variant/60"></div>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary-container">
+              <span class="material-symbols-outlined text-[20px]">picture_in_picture_alt</span>
+            </div>
+            <div>
+              <span class="font-display text-sm font-bold text-white block">Segundo Plano</span>
+              <span class="font-body text-[12px] text-on-surface-variant">Notificación al bloquear o cambiar de app</span>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input id="toggle-fondo" type="checkbox" class="sr-only peer">
+            <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-container-lowest after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+          </label>
+        </div>
+      </section>
+    </main>
+
+    <div class="fixed bottom-0 left-0 w-full z-50 p-4 bg-surface-container-lowest/95 backdrop-blur-md border-t border-outline-variant/40 max-w-lg mx-auto right-0">
+      <button id="btn-terminar-descanso" class="w-full h-14 bg-primary-container hover:brightness-105 text-on-primary-fixed font-display font-bold text-base uppercase tracking-wide rounded-xl flex items-center justify-center gap-2 shadow-[0px_4px_24px_rgba(195,244,0,0.35)] active:scale-[0.98] transition-all">
+        <span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+        <span>TERMINAR DESCANSO Y COMENZAR SERIE</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <nav class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-low/95 backdrop-blur border-t border-outline-variant flex justify-around items-center h-16 px-2">
   <button data-tab="entrenar" class="tab-btn flex flex-col items-center justify-center text-primary py-1">
     <span class="material-symbols-outlined text-xl">timer</span>
@@ -142,6 +317,50 @@ tailwind.config = {
 
 <script>
 const DESCANSO_DEFAULT = 90;
+const CIRCUNFERENCIA_DIAL = 665.9;
+const PRESETS_DESCANSO = [
+  { id: "fuerza", nombre: "Fuerza / Comp.", sub: "RPE 8-10 · Rápido SNC", seg: 180 },
+  { id: "hipertrofia", nombre: "Hipertrofia", sub: "Tensión mecánica ideal", seg: 120 },
+  { id: "aislamiento", nombre: "Aislamiento", sub: "Brazos, deltoides, gemelos", seg: 90 },
+  { id: "biseries", nombre: "Biseries / Super", sub: "Densidad y bombeo", seg: 45 }
+];
+
+function getConfigDescanso() {
+  let c = JSON.parse(localStorage.getItem("ent_config_descanso") || "null");
+  if (!c) {
+    c = { duracionDefault: DESCANSO_DEFAULT, sonido: true, vibracion: true, fondo: true, tipoSonido: "beep", volumen: 85 };
+    localStorage.setItem("ent_config_descanso", JSON.stringify(c));
+  }
+  return c;
+}
+function saveConfigDescanso(c) { localStorage.setItem("ent_config_descanso", JSON.stringify(c)); }
+
+let audioCtx = null;
+function reproducirSonido(tipo, volumenPct) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let ahora = audioCtx.currentTime;
+    let patrones = {
+      beep: [[880, 0.15]],
+      campana: [[523, 0.35]],
+      chime: [[660, 0.1], [880, 0.1], [1100, 0.2]]
+    };
+    let notas = patrones[tipo] || patrones.beep;
+    let t = ahora;
+    notas.forEach(([freq, dur]) => {
+      let osc = audioCtx.createOscillator();
+      let gain = audioCtx.createGain();
+      osc.frequency.value = freq;
+      osc.type = "sine";
+      gain.gain.value = (volumenPct / 100) * 0.3;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + dur);
+      t += dur + 0.05;
+    });
+  } catch (e) { /* audio no disponible */ }
+}
 
 function getEjercicios() {
   let e = JSON.parse(localStorage.getItem("ent_ejercicios") || "null");
@@ -217,27 +436,54 @@ function cambiarTab(tab) {
 document.querySelectorAll(".tab-btn").forEach(b => b.onclick = () => cambiarTab(b.dataset.tab));
 
 // ---------- Cronómetro de sesión y descanso ----------
+function restanteDescanso(descanso) {
+  if (descanso.pausado) return descanso.restante;
+  return Math.round((descanso.finAt - Date.now()) / 1000);
+}
+
+function finalizarDescanso(s) {
+  let config = getConfigDescanso();
+  if (config.sonido) reproducirSonido(config.tipoSonido, config.volumen);
+  if (config.vibracion && navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+  if (config.fondo && document.hidden && "Notification" in window && Notification.permission === "granted") {
+    new Notification("¡Descanso terminado!", { body: "Es hora de la siguiente serie." });
+  }
+  s.descanso = null;
+  saveSesion(s);
+}
+
 setInterval(() => {
   let s = getSesion();
   if (!s) return;
+
+  if (s.descanso) {
+    let restante = restanteDescanso(s.descanso);
+    if (restante <= 5 && restante > 0) {
+      let config = getConfigDescanso();
+      if (config.vibracion && navigator.vibrate) navigator.vibrate(80);
+    }
+    if (restante <= 0 && !s.descanso.pausado) {
+      finalizarDescanso(s);
+      if (tabActual === "entrenar") renderEntrenar();
+      if (document.getElementById("vista-descanso").classList.contains("show")) cerrarVistaDescanso();
+      return;
+    }
+  }
+
   if (tabActual === "entrenar") {
     let elTiempo = document.getElementById("tiempo-transcurrido");
     if (elTiempo) elTiempo.textContent = fmtTiempo((Date.now() - s.inicio) / 1000);
 
     if (s.descanso) {
-      let restante = Math.round((s.descanso.finAt - Date.now()) / 1000);
-      if (restante <= 0) {
-        s.descanso = null;
-        saveSesion(s);
-        renderEntrenar();
-      } else {
-        let elRest = document.getElementById("descanso-restante");
-        let elBarra = document.getElementById("descanso-barra");
-        if (elRest) elRest.textContent = fmtTiempo(restante);
-        if (elBarra) elBarra.style.width = Math.max(0, Math.min(100, (restante / s.descanso.total) * 100)) + "%";
-      }
+      let restante = restanteDescanso(s.descanso);
+      let elRest = document.getElementById("descanso-restante");
+      let elBarra = document.getElementById("descanso-barra");
+      if (elRest) elRest.textContent = fmtTiempo(restante);
+      if (elBarra) elBarra.style.width = Math.max(0, Math.min(100, (restante / s.descanso.total) * 100)) + "%";
     }
   }
+
+  if (document.getElementById("vista-descanso").classList.contains("show")) actualizarVistaDescanso();
 }, 1000);
 
 // ---------- Vista ENTRENAR ----------
@@ -253,10 +499,10 @@ function renderEntrenar() {
   cont.innerHTML = "";
 
   if (s.descanso) {
-    let restante = Math.max(0, Math.round((s.descanso.finAt - Date.now()) / 1000));
+    let restante = Math.max(0, restanteDescanso(s.descanso));
     let pct = Math.max(0, Math.min(100, (restante / s.descanso.total) * 100));
     let card = document.createElement("div");
-    card.className = "relative bg-surface-container rounded-xl p-4 border border-outline-variant shadow-lg overflow-hidden";
+    card.className = "relative bg-surface-container rounded-xl p-4 border border-outline-variant shadow-lg overflow-hidden cursor-pointer";
     card.innerHTML = `
       <div class="absolute top-0 left-0 right-0 h-1 bg-outline-variant">
         <div id="descanso-barra" class="h-full bg-primary transition-all" style="width:${pct}%"></div>
@@ -268,8 +514,8 @@ function renderEntrenar() {
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <span class="text-[10px] font-bold tracking-widest text-primary uppercase">DESCANSO ACTIVO</span>
-              <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+              <span class="text-[10px] font-bold tracking-widest text-primary uppercase">${s.descanso.pausado ? "DESCANSO PAUSADO" : "DESCANSO ACTIVO"}</span>
+              <span class="w-2 h-2 rounded-full bg-primary ${s.descanso.pausado ? "" : "animate-pulse"}"></span>
             </div>
             <div class="flex items-baseline gap-1.5">
               <span id="descanso-restante" class="text-3xl font-black tracking-tight text-white">${fmtTiempo(restante)}</span>
@@ -278,11 +524,13 @@ function renderEntrenar() {
           </div>
         </div>
         <div class="flex items-center gap-2">
+          <button id="btn-expandir-descanso" class="bg-surface-container-high hover:bg-outline-variant text-primary p-2 rounded-lg border border-outline-variant transition active:scale-95" title="Ampliar"><span class="material-symbols-outlined text-lg">open_in_full</span></button>
           <button id="btn-mas30" class="bg-surface-container-high hover:bg-outline-variant text-white text-xs font-bold px-3 py-2 rounded-lg border border-outline-variant transition active:scale-95">+30s</button>
           <button id="btn-saltar-descanso" class="bg-surface-container-high hover:bg-outline-variant text-on-surface-variant hover:text-white text-xs font-semibold px-3 py-2 rounded-lg border border-outline-variant transition active:scale-95">Saltar</button>
         </div>
       </div>`;
     cont.appendChild(card);
+    card.querySelector("#btn-expandir-descanso").onclick = () => abrirVistaDescanso();
     card.querySelector("#btn-mas30").onclick = () => {
       let ses = getSesion();
       ses.descanso.finAt += 30000;
@@ -415,7 +663,8 @@ function renderEjercicioCard(s, ej, idxEj) {
       serieNow.hecho = !serieNow.hecho;
       if (serieNow.hecho) {
         serieNow.fecha = new Date().toISOString();
-        sNow.descanso = { finAt: Date.now() + DESCANSO_DEFAULT * 1000, total: DESCANSO_DEFAULT };
+        let dur = getConfigDescanso().duracionDefault;
+        sNow.descanso = { finAt: Date.now() + dur * 1000, total: dur, pausado: false, restante: dur, ejercicioIdx: idxEj, serieIdx: idxSerie };
       }
       saveSesion(sNow);
       renderEntrenar();
@@ -744,6 +993,226 @@ document.getElementById("btn-add-ejercicio-lib").onclick = () => {
   saveEjercicios(ejercicios);
   input.value = "";
   renderEjercicios();
+};
+
+// ---------- Vista ampliada de descanso ----------
+const TIPOS_SONIDO = [
+  { id: "beep", label: "Beep Progr." },
+  { id: "campana", label: "Campana Box" },
+  { id: "chime", label: "Chime Digital" }
+];
+
+function siguienteSetInfo(s) {
+  if (!s.descanso) return null;
+  let startEj = s.descanso.ejercicioIdx;
+  let startSerie = s.descanso.serieIdx + 1;
+  for (let i = startEj; i < s.ejercicios.length; i++) {
+    let ej = s.ejercicios[i];
+    let desde = i === startEj ? startSerie : 0;
+    for (let j = desde; j < ej.series.length; j++) {
+      if (!ej.series[j].hecho) {
+        return { nombre: ej.nombre, serieNum: j + 1, totalSeries: ej.series.length, kg: ej.series[j].kg, reps: ej.series[j].reps };
+      }
+    }
+  }
+  return null;
+}
+
+function renderPresetsDescanso() {
+  let cont = document.getElementById("presets-descanso-cont");
+  cont.innerHTML = "";
+  let config = getConfigDescanso();
+  PRESETS_DESCANSO.forEach(p => {
+    let activo = config.duracionDefault === p.seg;
+    let btn = document.createElement("button");
+    btn.className = "rounded-xl p-3 flex flex-col text-left active:scale-[0.98] transition-all relative overflow-hidden border " +
+      (activo ? "bg-primary-container/10 border-2 border-primary-container" : "bg-surface-container hover:bg-surface-container-high border-outline-variant/60");
+    btn.innerHTML = `
+      ${activo ? '<div class="absolute top-0 right-0 bg-primary-container text-on-primary-fixed px-1.5 py-0.5 rounded-bl font-mono text-[9px] font-bold">ACTIVO</div>' : ""}
+      <div class="flex items-center justify-between w-full">
+        <span class="font-display text-xs font-bold ${activo ? "text-primary-container" : "text-white"} uppercase">${p.nombre}</span>
+        <span class="font-mono text-xs font-bold ${activo ? "text-primary-container" : "text-on-surface-variant"}">${fmtTiempo(p.seg)}</span>
+      </div>
+      <span class="font-mono text-[10px] ${activo ? "text-white/80" : "text-on-surface-variant"} mt-1">${p.sub}</span>`;
+    btn.onclick = () => {
+      let c = getConfigDescanso();
+      c.duracionDefault = p.seg;
+      saveConfigDescanso(c);
+      let sNow = getSesion();
+      if (sNow && sNow.descanso) {
+        if (sNow.descanso.pausado) { sNow.descanso.restante = p.seg; } else { sNow.descanso.finAt = Date.now() + p.seg * 1000; }
+        sNow.descanso.total = p.seg;
+        saveSesion(sNow);
+      }
+      renderPresetsDescanso();
+      actualizarVistaDescanso();
+      if (tabActual === "entrenar") renderEntrenar();
+    };
+    cont.appendChild(btn);
+  });
+}
+
+function renderTiposSonido() {
+  let cont = document.getElementById("tipos-sonido-cont");
+  cont.innerHTML = "";
+  let config = getConfigDescanso();
+  TIPOS_SONIDO.forEach(t => {
+    let activo = config.tipoSonido === t.id;
+    let btn = document.createElement("button");
+    btn.className = "py-2 px-1 text-center font-mono text-[11px] rounded-lg border flex items-center justify-center gap-1 active:scale-95 transition-transform " +
+      (activo ? "bg-primary-container text-on-primary-fixed font-bold border-primary-container" : "bg-surface-container-high hover:bg-surface-variant text-white border-outline-variant/40");
+    btn.innerHTML = '<span class="material-symbols-outlined text-[14px]">play_arrow</span> ' + t.label;
+    btn.onclick = () => {
+      let c = getConfigDescanso();
+      c.tipoSonido = t.id;
+      saveConfigDescanso(c);
+      reproducirSonido(t.id, c.volumen);
+      renderTiposSonido();
+    };
+    cont.appendChild(btn);
+  });
+}
+
+function abrirVistaDescanso() {
+  let s = getSesion();
+  if (!s || !s.descanso) return;
+  renderPresetsDescanso();
+  renderTiposSonido();
+  let config = getConfigDescanso();
+  document.getElementById("toggle-sonido").checked = config.sonido;
+  document.getElementById("toggle-vibracion").checked = config.vibracion;
+  document.getElementById("toggle-fondo").checked = config.fondo;
+  document.getElementById("slider-volumen").value = config.volumen;
+  document.getElementById("volumen-label").textContent = config.volumen + "%";
+  if (config.fondo && "Notification" in window && Notification.permission === "default") {
+    Notification.requestPermission();
+  }
+  actualizarVistaDescanso();
+  document.getElementById("vista-descanso").classList.add("show");
+}
+
+function cerrarVistaDescanso() {
+  document.getElementById("vista-descanso").classList.remove("show");
+}
+
+function actualizarVistaDescanso() {
+  let s = getSesion();
+  if (!s || !s.descanso) { cerrarVistaDescanso(); return; }
+  let restante = Math.max(0, restanteDescanso(s.descanso));
+
+  document.getElementById("descanso-full-tiempo").textContent = fmtTiempo(restante);
+  document.getElementById("descanso-full-meta").textContent = fmtTiempo(s.descanso.total);
+
+  let offset = CIRCUNFERENCIA_DIAL * (s.descanso.total > 0 ? restante / s.descanso.total : 0);
+  let dial = document.getElementById("dial-descanso");
+  dial.style.strokeDashoffset = offset;
+  dial.setAttribute("stroke", restante <= 10 ? "#ff5708" : "#c3f400");
+
+  let estadoEl = document.getElementById("descanso-full-estado");
+  estadoEl.innerHTML = s.descanso.pausado
+    ? '<span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant"></span> PAUSADO'
+    : '<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span> EN CURSO';
+
+  let ejActivo = s.ejercicios[s.descanso.ejercicioIdx];
+  if (ejActivo) {
+    document.getElementById("descanso-badge-serie").textContent = "SERIE " + (s.descanso.serieIdx + 1) + " / " + ejActivo.series.length;
+  }
+
+  document.getElementById("icono-pausar").textContent = s.descanso.pausado ? "play_arrow" : "pause";
+  document.getElementById("texto-pausar").textContent = s.descanso.pausado ? "REANUDAR" : "PAUSAR";
+
+  let siguiente = siguienteSetInfo(s);
+  let card = document.getElementById("siguiente-set-card");
+  let contenido = document.getElementById("siguiente-set-contenido");
+  if (siguiente) {
+    card.style.display = "flex";
+    contenido.innerHTML = `
+      <div>
+        <h3 class="font-display text-lg font-bold text-white leading-snug">${siguiente.nombre}</h3>
+        <span class="font-body text-sm text-on-surface-variant">Serie ${siguiente.serieNum} de ${siguiente.totalSeries}</span>
+      </div>
+      <div class="text-right">
+        <span class="font-mono text-[10px] text-on-surface-variant block uppercase">CARGA OBJETIVO</span>
+        <div class="font-mono text-base font-bold text-primary-container bg-surface-container-lowest px-2.5 py-1 rounded border border-outline-variant">
+          ${siguiente.kg} kg × ${siguiente.reps} reps
+        </div>
+      </div>`;
+  } else {
+    card.style.display = "none";
+  }
+
+  document.getElementById("preset-activo-label").textContent = "AJUSTE ACTIVO: " + fmtTiempo(s.descanso.total);
+}
+
+document.getElementById("btn-volver-descanso").onclick = () => cerrarVistaDescanso();
+
+document.getElementById("btn-full-mas30").onclick = () => {
+  let s = getSesion();
+  if (!s || !s.descanso) return;
+  if (s.descanso.pausado) { s.descanso.restante += 30; } else { s.descanso.finAt += 30000; }
+  s.descanso.total += 30;
+  saveSesion(s);
+  actualizarVistaDescanso();
+  if (tabActual === "entrenar") renderEntrenar();
+};
+
+document.getElementById("btn-full-pausar").onclick = () => {
+  let s = getSesion();
+  if (!s || !s.descanso) return;
+  if (s.descanso.pausado) {
+    s.descanso.finAt = Date.now() + s.descanso.restante * 1000;
+    s.descanso.pausado = false;
+  } else {
+    s.descanso.restante = restanteDescanso(s.descanso);
+    s.descanso.pausado = true;
+  }
+  saveSesion(s);
+  actualizarVistaDescanso();
+  if (tabActual === "entrenar") renderEntrenar();
+};
+
+document.getElementById("btn-full-reset").onclick = () => {
+  let s = getSesion();
+  if (!s || !s.descanso) return;
+  s.descanso.finAt = Date.now() + s.descanso.total * 1000;
+  s.descanso.restante = s.descanso.total;
+  s.descanso.pausado = false;
+  saveSesion(s);
+  actualizarVistaDescanso();
+  if (tabActual === "entrenar") renderEntrenar();
+};
+
+document.getElementById("btn-full-saltar").onclick = () => {
+  let s = getSesion();
+  if (!s) return;
+  s.descanso = null;
+  saveSesion(s);
+  cerrarVistaDescanso();
+  if (tabActual === "entrenar") renderEntrenar();
+};
+
+document.getElementById("btn-terminar-descanso").onclick = () => {
+  let s = getSesion();
+  if (!s) return;
+  s.descanso = null;
+  saveSesion(s);
+  cerrarVistaDescanso();
+  if (tabActual === "entrenar") renderEntrenar();
+};
+
+document.getElementById("toggle-sonido").onchange = e => {
+  let c = getConfigDescanso(); c.sonido = e.target.checked; saveConfigDescanso(c);
+};
+document.getElementById("toggle-vibracion").onchange = e => {
+  let c = getConfigDescanso(); c.vibracion = e.target.checked; saveConfigDescanso(c);
+};
+document.getElementById("toggle-fondo").onchange = e => {
+  let c = getConfigDescanso(); c.fondo = e.target.checked; saveConfigDescanso(c);
+  if (c.fondo && "Notification" in window && Notification.permission === "default") Notification.requestPermission();
+};
+document.getElementById("slider-volumen").oninput = e => {
+  let c = getConfigDescanso(); c.volumen = parseInt(e.target.value) || 0; saveConfigDescanso(c);
+  document.getElementById("volumen-label").textContent = c.volumen + "%";
 };
 
 // ---------- Init ----------
