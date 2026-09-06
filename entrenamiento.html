@@ -131,6 +131,20 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- Modal: ajustar duración de auto-descanso -->
+<div class="modal-overlay" id="modal-ajustar-descanso">
+  <div class="modal-content">
+    <h2 class="text-lg font-extrabold text-white uppercase mb-4">Auto-descanso</h2>
+    <p class="text-xs text-on-surface-variant font-body mb-3">Duración que arranca automáticamente al marcar el check de una serie.</p>
+    <div id="presets-ajustar-cont" class="grid grid-cols-2 gap-2 mb-3"></div>
+    <div class="flex items-center gap-2 mb-4">
+      <input id="input-ajustar-custom" type="number" min="5" placeholder="Personalizado (seg)" class="flex-1 bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-white font-body text-sm">
+      <button id="btn-ajustar-custom" class="bg-surface-container-high hover:bg-outline-variant text-white font-bold text-xs px-4 py-2 rounded-lg border border-outline-variant">Usar</button>
+    </div>
+    <button id="btn-ajustar-cerrar" class="w-full py-3 bg-surface-container-high text-white font-bold rounded-lg text-sm">Cerrar</button>
+  </div>
+</div>
+
 <!-- Vista ampliada del cronómetro de descanso -->
 <div id="vista-descanso" class="vista-full">
   <div class="max-w-lg mx-auto w-full flex flex-col pb-32">
@@ -462,6 +476,13 @@ setInterval(() => {
       let config = getConfigDescanso();
       if (config.vibracion && navigator.vibrate) navigator.vibrate(80);
     }
+    if (restante <= 15 && restante > 0 && !s.descanso.pausado && !s.descanso.preavisoVibrado) {
+      s.descanso.preavisoVibrado = true;
+      saveSesion(s);
+      let config = getConfigDescanso();
+      if (config.vibracion && navigator.vibrate) navigator.vibrate([150, 80, 150]);
+      if (tabActual === "entrenar") renderEntrenar();
+    }
     if (restante <= 0 && !s.descanso.pausado) {
       finalizarDescanso(s);
       if (tabActual === "entrenar") renderEntrenar();
@@ -480,6 +501,8 @@ setInterval(() => {
       let elBarra = document.getElementById("descanso-barra");
       if (elRest) elRest.textContent = fmtTiempo(restante);
       if (elBarra) elBarra.style.width = Math.max(0, Math.min(100, (restante / s.descanso.total) * 100)) + "%";
+      let elPreaviso = document.getElementById("preaviso-restante");
+      if (elPreaviso) elPreaviso.textContent = restante;
     }
   }
 
@@ -544,6 +567,28 @@ function renderEntrenar() {
       saveSesion(ses);
       renderEntrenar();
     };
+
+    if (!s.descanso.preavisoDescartado && restante <= 15) {
+      let siguiente = siguienteSetInfo(s);
+      let toast = document.createElement("div");
+      toast.id = "preaviso-toast";
+      toast.className = "p-3 bg-primary/10 border border-primary/50 rounded-xl flex items-center justify-between shadow-lg";
+      toast.innerHTML = `
+        <div class="flex items-center gap-2.5">
+          <span class="material-symbols-outlined text-primary animate-bounce">vibration</span>
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-primary">⚡ Preaviso: <span id="preaviso-restante">${restante}</span>s restantes</span>
+            <p class="text-xs text-on-surface-variant font-body font-medium">${siguiente ? "Prepárate para " + siguiente.nombre + " · Serie " + siguiente.serieNum : "Prepárate para la siguiente serie"}</p>
+          </div>
+        </div>
+        <button id="btn-cerrar-preaviso" class="text-on-surface-variant hover:text-white p-1"><span class="material-symbols-outlined text-base">close</span></button>`;
+      cont.appendChild(toast);
+      toast.querySelector("#btn-cerrar-preaviso").onclick = () => {
+        let ses = getSesion();
+        if (ses && ses.descanso) { ses.descanso.preavisoDescartado = true; saveSesion(ses); }
+        toast.remove();
+      };
+    }
   }
 
   let header = document.createElement("div");
@@ -561,7 +606,35 @@ function renderEntrenar() {
     </div>`;
   cont.appendChild(header);
 
+  let configActual = getConfigDescanso();
+  let barraConfig = document.createElement("div");
+  barraConfig.className = "px-3 py-2 bg-surface-container-low border border-outline-variant rounded-lg flex items-center justify-between text-xs";
+  barraConfig.innerHTML = `
+    <span class="text-on-surface-variant font-body flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-primary text-sm">bolt</span>
+      Auto-descanso: <strong class="text-primary font-mono">${fmtTiempo(configActual.duracionDefault)}</strong> al marcar check
+    </span>
+    <button id="btn-ajustar-autodescanso" class="text-on-surface-variant hover:text-primary flex items-center gap-1 font-bold">
+      <span class="material-symbols-outlined text-sm">tune</span> Ajustar
+    </button>`;
+  cont.appendChild(barraConfig);
+  barraConfig.querySelector("#btn-ajustar-autodescanso").onclick = () => abrirAjustarDescanso();
+
   s.ejercicios.forEach((ej, idxEj) => cont.appendChild(renderEjercicioCard(s, ej, idxEj)));
+
+  let pendiente = proximoEjercicioPendiente(s);
+  if (pendiente) {
+    let btnSiguiente = document.createElement("button");
+    btnSiguiente.className = "w-full py-3 px-4 bg-primary text-black font-extrabold rounded-xl flex items-center justify-between text-sm shadow-md active:scale-[0.98] transition";
+    btnSiguiente.innerHTML = `
+      <span class="flex items-center gap-2"><span class="material-symbols-outlined text-lg">fast_forward</span> Siguiente: ${pendiente.nombre}</span>
+      <span class="material-symbols-outlined">arrow_forward</span>`;
+    btnSiguiente.onclick = () => {
+      let el = document.getElementById("ejercicio-card-" + pendiente.idx);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    };
+    cont.appendChild(btnSiguiente);
+  }
 
   let btnAdd = document.createElement("button");
   btnAdd.className = "w-full bg-surface-container hover:bg-surface-container-high border border-outline-variant hover:border-primary text-white font-extrabold text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition active:scale-95 mt-1";
@@ -575,8 +648,16 @@ function renderEntrenar() {
   cont.appendChild(btnAdd);
 }
 
+function proximoEjercicioPendiente(s) {
+  for (let i = 0; i < s.ejercicios.length; i++) {
+    if (s.ejercicios[i].series.some(x => !x.hecho)) return { idx: i, nombre: s.ejercicios[i].nombre };
+  }
+  return null;
+}
+
 function renderEjercicioCard(s, ej, idxEj) {
   let card = document.createElement("div");
+  card.id = "ejercicio-card-" + idxEj;
   card.className = "bg-surface-container-low rounded-xl border border-outline-variant overflow-hidden";
 
   let ultimaVez = ultimaVezEjercicio(ej.nombre);
@@ -674,6 +755,29 @@ function renderEjercicioCard(s, ej, idxEj) {
   });
 
   cuerpo.appendChild(listaSeries);
+
+  let idxPrimeraPendiente = ej.series.findIndex(x => !x.hecho);
+  if (idxPrimeraPendiente !== -1) {
+    let ajusteRapido = document.createElement("div");
+    ajusteRapido.className = "flex items-center justify-between pt-2 px-1 text-xs";
+    ajusteRapido.innerHTML = `
+      <span class="text-on-surface-variant font-mono uppercase text-[10px]">Ajuste rápido:</span>
+      <div class="flex gap-1.5">
+        <button data-inc="1.25" class="btn-ajuste-rapido px-2.5 py-1 bg-surface-container-high hover:bg-outline-variant rounded text-white font-mono text-xs font-semibold">+1.25 kg</button>
+        <button data-inc="2.5" class="btn-ajuste-rapido px-2.5 py-1 bg-surface-container-high hover:bg-outline-variant rounded text-primary font-mono text-xs font-semibold">+2.5 kg</button>
+        <button data-inc="5" class="btn-ajuste-rapido px-2.5 py-1 bg-surface-container-high hover:bg-outline-variant rounded text-white font-mono text-xs font-semibold">+5 kg</button>
+      </div>`;
+    ajusteRapido.querySelectorAll(".btn-ajuste-rapido").forEach(btn => {
+      btn.onclick = () => {
+        let sNow = getSesion();
+        let serieObj = sNow.ejercicios[idxEj].series[idxPrimeraPendiente];
+        serieObj.kg = Math.round((serieObj.kg + parseFloat(btn.dataset.inc)) * 100) / 100;
+        saveSesion(sNow);
+        renderEntrenar();
+      };
+    });
+    cuerpo.appendChild(ajusteRapido);
+  }
 
   let btnAddSerie = document.createElement("button");
   btnAddSerie.className = "w-full mt-3 py-2 border border-dashed border-outline-variant hover:border-primary/50 rounded-lg text-xs font-bold text-on-surface-variant hover:text-primary transition flex items-center justify-center gap-1";
@@ -878,6 +982,24 @@ document.getElementById("btn-elegir-cancelar").onclick = () => {
   document.getElementById("modal-elegir-ejercicio").classList.remove("show");
 };
 
+function abrirAjustarDescanso() {
+  document.getElementById("input-ajustar-custom").value = "";
+  renderPresetsAjustar();
+  document.getElementById("modal-ajustar-descanso").classList.add("show");
+}
+document.getElementById("btn-ajustar-cerrar").onclick = () => {
+  document.getElementById("modal-ajustar-descanso").classList.remove("show");
+};
+document.getElementById("btn-ajustar-custom").onclick = () => {
+  let seg = parseInt(document.getElementById("input-ajustar-custom").value);
+  if (!seg || seg < 5) { alert("Ingresá una duración válida en segundos (mínimo 5)"); return; }
+  let c = getConfigDescanso();
+  c.duracionDefault = seg;
+  saveConfigDescanso(c);
+  document.getElementById("modal-ajustar-descanso").classList.remove("show");
+  if (tabActual === "entrenar") renderEntrenar();
+};
+
 // ---------- Vista HISTORIAL ----------
 function renderHistorial() {
   let cont = document.getElementById("historial-lista-cont");
@@ -1018,8 +1140,12 @@ function siguienteSetInfo(s) {
   return null;
 }
 
-function renderPresetsDescanso() {
-  let cont = document.getElementById("presets-descanso-cont");
+function renderPresetsDescanso() { renderPresetsGenerico("presets-descanso-cont", true); }
+function renderPresetsAjustar() { renderPresetsGenerico("presets-ajustar-cont", false); }
+
+function renderPresetsGenerico(containerId, aplicarADescansoActivo) {
+  let cont = document.getElementById(containerId);
+  if (!cont) return;
   cont.innerHTML = "";
   let config = getConfigDescanso();
   PRESETS_DESCANSO.forEach(p => {
@@ -1038,14 +1164,17 @@ function renderPresetsDescanso() {
       let c = getConfigDescanso();
       c.duracionDefault = p.seg;
       saveConfigDescanso(c);
-      let sNow = getSesion();
-      if (sNow && sNow.descanso) {
-        if (sNow.descanso.pausado) { sNow.descanso.restante = p.seg; } else { sNow.descanso.finAt = Date.now() + p.seg * 1000; }
-        sNow.descanso.total = p.seg;
-        saveSesion(sNow);
+      if (aplicarADescansoActivo) {
+        let sNow = getSesion();
+        if (sNow && sNow.descanso) {
+          if (sNow.descanso.pausado) { sNow.descanso.restante = p.seg; } else { sNow.descanso.finAt = Date.now() + p.seg * 1000; }
+          sNow.descanso.total = p.seg;
+          saveSesion(sNow);
+        }
+        actualizarVistaDescanso();
       }
       renderPresetsDescanso();
-      actualizarVistaDescanso();
+      renderPresetsAjustar();
       if (tabActual === "entrenar") renderEntrenar();
     };
     cont.appendChild(btn);
