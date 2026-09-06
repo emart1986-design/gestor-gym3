@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#131319">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IronForge">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<title>IRONFORGE - Placa de Entrenamiento</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-tertiary-container": "#006f7c",
+          "outline": "#8e9379",
+          "secondary-fixed-dim": "#ffb59c",
+          "tertiary": "#ffffff",
+          "on-tertiary-fixed-variant": "#004f58",
+          "secondary": "#ffb59c",
+          "on-secondary-container": "#511500",
+          "tertiary-fixed-dim": "#00daf3",
+          "on-tertiary": "#00363d",
+          "primary-fixed": "#c3f400",
+          "surface-container": "#1f1f25",
+          "on-error": "#690005",
+          "on-primary": "#283500",
+          "tertiary-fixed": "#9cf0ff",
+          "surface-bright": "#39383f",
+          "outline-variant": "#444933",
+          "on-tertiary-fixed": "#001f24",
+          "on-primary-container": "#556d00",
+          "surface-tint": "#abd600",
+          "inverse-surface": "#e4e1ea",
+          "primary-container": "#c3f400",
+          "surface-container-highest": "#34343b",
+          "primary-fixed-dim": "#abd600",
+          "inverse-primary": "#506600",
+          "surface-container-low": "#1b1b21",
+          "surface-dim": "#131319",
+          "inverse-on-surface": "#303036",
+          "surface-container-lowest": "#0e0e14",
+          "surface": "#131319",
+          "on-secondary": "#5c1900",
+          "surface-container-high": "#2a2930",
+          "secondary-container": "#ff5708",
+          "on-background": "#e4e1ea",
+          "error": "#ffb4ab",
+          "surface-variant": "#34343b",
+          "primary": "#ffffff",
+          "on-error-container": "#ffdad6",
+          "on-primary-fixed": "#161e00",
+          "tertiary-container": "#9cf0ff",
+          "on-surface-variant": "#c4c9ac",
+          "on-primary-fixed-variant": "#3c4d00",
+          "on-surface": "#e4e1ea",
+          "error-container": "#93000a",
+          "background": "#131319",
+          "on-secondary-fixed-variant": "#822700",
+          "on-secondary-fixed": "#390c00",
+          "secondary-fixed": "#ffdbcf"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-xl": "1.5rem",
+          "container-padding-tablet": "1.5rem",
+          "space-md": "1rem",
+          "space-lg": "1.25rem",
+          "container-padding-mobile": "1rem",
+          "tap-comfortable": "3.5rem",
+          "tap-min": "3rem",
+          "space-2xl": "2rem",
+          "space-xs": "0.5rem",
+          "space-xxs": "0.25rem",
+          "space-3xl": "3rem",
+          "space-sm": "0.75rem"
+        },
+        "fontFamily": {
+          "data-metric-md": ["JetBrains Mono"],
+          "body-lg": ["Space Grotesk"],
+          "label-sm": ["JetBrains Mono"],
+          "headline-lg-mobile": ["Space Grotesk"],
+          "display-xl-mobile": ["Space Grotesk"],
+          "headline-lg": ["Space Grotesk"],
+          "headline-md": ["Space Grotesk"],
+          "label-caps": ["JetBrains Mono"],
+          "headline-sm": ["Space Grotesk"],
+          "body-md": ["Space Grotesk"],
+          "display-xl": ["Space Grotesk"],
+          "data-metric-lg": ["JetBrains Mono"]
+        },
+        "fontSize": {
+          "data-metric-md": ["22px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+          "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" }],
+          "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+          "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+          "display-xl-mobile": ["44px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+          "headline-lg": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+          "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+          "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+          "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" }],
+          "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+          "display-xl": ["56px", { "lineHeight": "60px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+          "data-metric-lg": ["32px", { "lineHeight": "36px", "letterSpacing": "-0.03em", "fontWeight": "700" }]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    vertical-align: middle;
+  }
+  @keyframes pulse-subtle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.65; transform: scale(0.98); }
+  }
+  .animate-pulse-subtle { animation: pulse-subtle 1.8s ease-in-out infinite; }
+  .pr-glow-active {
+    box-shadow: 0px 0px 20px rgba(195, 244, 0, 0.15);
+    border-left: 3px solid #c3f400;
+  }
+  .bar-sleeve { background: linear-gradient(180deg, #58586c 0%, #2f2f3d 50%, #1a1a24 100%); }
+  .bar-collar { background: linear-gradient(180deg, #87879b 0%, #4a4a5a 50%, #232330 100%); }
+  body { min-height: max(884px, 100dvh); background-color: #131319; color: #e4e1ea; }
+  [hidden] { display: none !important; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
+  .modal-sheet { background: #1f1f25; border-radius: 1rem 1rem 0 0; padding: 1.5rem; padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); width: 100%; max-width: 32rem; }
+  .toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px); background: #c3f400; color: #283500; font-weight: 700; padding: 0.6rem 1.1rem; border-radius: 0.75rem; z-index: 300; opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; font-family: 'Space Grotesk', sans-serif; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body class="bg-background text-on-background min-h-screen selection:bg-primary-container selection:text-on-primary font-body-md text-body-md antialiased pb-28">
+
+<header class="bg-surface-container sticky top-0 z-40 w-full shadow-md">
+  <div class="flex justify-between items-center w-full px-container-padding-mobile h-tap-comfortable max-w-lg mx-auto">
+    <div class="flex items-center gap-space-xs">
+      <span class="material-symbols-outlined text-primary-container text-[24px]">fitness_center</span>
+      <span class="text-headline-md font-headline-md font-bold tracking-tight text-primary-container">IRONFORGE</span>
+    </div>
+    <div class="flex items-center gap-space-xs" id="header-actions"></div>
+  </div>
+</header>
+
+<main class="max-w-lg mx-auto px-container-padding-mobile pt-space-md">
+
+  <!-- VISTA: ENTRENAR -->
+  <section id="view-entrenar" hidden></section>
+
+  <!-- VISTA: RUTINA -->
+  <section id="view-rutina" hidden class="pb-space-3xl flex flex-col gap-space-md"></section>
+
+  <!-- VISTA: PROGRESO -->
+  <section id="view-progreso" hidden class="flex flex-col gap-space-lg pb-space-3xl -mx-container-padding-mobile px-container-padding-mobile"></section>
+
+  <!-- VISTA: CALCULADORA -->
+  <section id="view-calculadora" hidden class="flex flex-col gap-space-md pb-space-3xl"></section>
+
+</main>
+
+<!-- OVERLAY: CRONOMETRO DE DESCANSO -->
+<section id="view-rest" hidden class="fixed inset-0 z-[100] bg-surface-container-lowest overflow-y-auto"></section>
+
+<!-- MODAL GENERICO -->
+<div id="modal-overlay" class="modal-overlay" hidden>
+  <div class="modal-sheet" id="modal-sheet"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav id="bottom-nav" class="bg-surface-container-high fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-container-padding-mobile py-space-xs max-w-lg mx-auto shadow-[0px_-4px_16px_rgba(0,0,0,0.6)]">
+  <button data-view="entrenar" class="nav-btn flex flex-col items-center justify-center px-space-sm py-space-xs active:scale-[0.98] transition-all duration-100 ease-out rounded-xl">
+    <span class="material-symbols-outlined text-[24px]" data-icon="timer">timer</span>
+    <span class="font-label-caps text-label-caps">Entrenar</span>
+  </button>
+  <button data-view="rutina" class="nav-btn flex flex-col items-center justify-center px-space-sm py-space-xs active:scale-[0.98] transition-all duration-100 ease-out rounded-xl">
+    <span class="material-symbols-outlined text-[24px]" data-icon="format_list_numbered">format_list_numbered</span>
+    <span class="font-label-caps text-label-caps">Rutina</span>
+  </button>
+  <button data-view="progreso" class="nav-btn flex flex-col items-center justify-center px-space-sm py-space-xs active:scale-[0.98] transition-all duration-100 ease-out rounded-xl">
+    <span class="material-symbols-outlined text-[24px]" data-icon="monitoring">monitoring</span>
+    <span class="font-label-caps text-label-caps">Progreso</span>
+  </button>
+  <button data-view="calculadora" class="nav-btn flex flex-col items-center justify-center px-space-sm py-space-xs active:scale-[0.98] transition-all duration-100 ease-out rounded-xl">
+    <span class="material-symbols-outlined text-[24px]" data-icon="calculate">calculate</span>
+    <span class="font-label-caps text-label-caps">Calculadora</span>
+  </button>
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>
