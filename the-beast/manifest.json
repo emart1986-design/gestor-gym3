@@ -1,0 +1,26 @@
+{
+  "name": "THE BEAST - Registro de Entrenamiento",
+  "short_name": "THE BEAST",
+  "description": "Placa de entrenamiento: registro de series, rutina, cronometro de descanso, calculadora de discos y progreso.",
+  "start_url": "/the-beast/",
+  "scope": "/the-beast/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#131319",
+  "background_color": "#131319",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["health", "fitness", "sports"]
+}
