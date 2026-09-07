@@ -1,5 +1,5 @@
-const CACHE_NAME = 'ironforge-v1';
-const urlsToCache = ['/ironforge/', '/ironforge/index.html', '/ironforge/app.js', '/ironforge/manifest.json'];
+const CACHE_NAME = 'the-beast-v1';
+const urlsToCache = ['/the-beast/', '/the-beast/index.html', '/the-beast/app.js', '/the-beast/manifest.json'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -35,6 +35,6 @@ self.addEventListener('fetch', event => {
           .then(cache => cache.put(event.request, responseToCache));
         return response;
       })
-      .catch(() => caches.match(event.request).then(cached => cached || caches.match('/ironforge/index.html')))
+      .catch(() => caches.match(event.request).then(cached => cached || caches.match('/the-beast/index.html')))
   );
 });

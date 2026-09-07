@@ -7,7 +7,7 @@
    Todo el estado se guarda en localStorage bajo STORAGE_KEY.
    ========================================================================= */
 
-const STORAGE_KEY = 'ironforge_data_v1';
+const STORAGE_KEY = 'the_beast_data_v1';
 const DIAS_CORTOS = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
 const MESES_CORTOS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 const PLANNED_SESSIONS_PER_WEEK = 5;
