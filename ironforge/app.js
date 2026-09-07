@@ -19,6 +19,12 @@ const REST_PRESETS = [
   { id: 'biseries', label: 'BISERIES / SUPER', sub: 'Densidad y bombeo', seconds: 45 }
 ];
 
+const PYRAMID_REPS = [6, 8, 10, 12];
+
+function pyramidRepsFor(setCount) {
+  return Array.from({ length: setCount }, (_, i) => PYRAMID_REPS[Math.min(i, PYRAMID_REPS.length - 1)]);
+}
+
 const SOUND_PRESETS = [
   { id: 'beep', label: 'Beep Progr.' },
   { id: 'campana', label: 'Campana Box' },
@@ -536,9 +542,9 @@ function startSession() {
       suffix: ex.suffix || '',
       prefix: ex.prefix || '',
       note: ex.note,
-      sets: Array.from({ length: ex.sets }, () => ({
+      sets: pyramidRepsFor(ex.sets).map(reps => ({
         weight: ex.target,
-        reps: ex.repMin,
+        reps,
         completed: false
       }))
     }))
