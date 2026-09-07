@@ -1,7 +1,7 @@
 'use strict';
 
 /* =========================================================================
-   IRONFORGE - Placa de Entrenamiento
+   THE BEAST - Placa de Entrenamiento
    App independiente (PWA) para registrar entrenamientos, ver la rutina del
    dia, calcular discos de barra, cronometrar descansos y ver progreso/PRs.
    Todo el estado se guarda en localStorage bajo STORAGE_KEY.
