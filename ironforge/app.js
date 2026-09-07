@@ -67,8 +67,9 @@ function defaultRoutinePull() {
       { id: 'ey1', name: 'Jalon al Pecho (agarre ancho)', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Maxima activacion de dorsal ancho (EMG); tirar con los codos hacia abajo y atras, sin impulso.', tag: 'ANCHO DE ESPALDA', restPresetId: 'hipertrofia' },
       { id: 'ey2', name: 'Remo en Polea Sentado', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Tension constante en toda la carrera; espalda recta, tirar hasta el abdomen sin balancear el torso.', tag: 'GROSOR DE ESPALDA', restPresetId: 'hipertrofia' },
       { id: 'ey3', name: 'Pull-Over en Polea', sets: 3, repMin: 10, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Aisla el dorsal sin pre-fatigar el biceps antes de los curls; brazos casi extendidos.', tag: 'AISLAMIENTO DORSAL', restPresetId: 'aislamiento' },
-      { id: 'ey4', name: 'Curl con Barra', sets: 4, repMin: 8, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Mayor activacion EMG de biceps braquial entre los curls; codos fijos, sin balanceo de cadera.', tag: 'MASA DE BICEPS', restPresetId: 'aislamiento' },
-      { id: 'ey5', name: 'Curl Martillo', sets: 3, repMin: 10, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Agarre neutro; enfasis en braquial y braquiorradial para grosor de brazo, no solo pico de biceps.', tag: 'BRAQUIAL/ANTEBRAZO', restPresetId: 'aislamiento' }
+      { id: 'ey4', name: 'Vuelo de Pajaro (Deltoide Posterior)', sets: 3, repMin: 12, repMax: 15, target: 0, unit: 'kg', suffix: ' c/u', rpe: '9', note: 'Codos con leve flexion fija; apretar omoplatos al final, sin usar impulso ni trapecio.', tag: 'DELTOIDE POSTERIOR', restPresetId: 'aislamiento' },
+      { id: 'ey5', name: 'Curl con Barra', sets: 4, repMin: 8, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Mayor activacion EMG de biceps braquial entre los curls; codos fijos, sin balanceo de cadera.', tag: 'MASA DE BICEPS', restPresetId: 'aislamiento' },
+      { id: 'ey6', name: 'Curl Martillo', sets: 3, repMin: 10, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Agarre neutro; enfasis en braquial y braquiorradial para grosor de brazo, no solo pico de biceps.', tag: 'BRAQUIAL/ANTEBRAZO', restPresetId: 'aislamiento' }
     ]
   };
 }
