@@ -48,11 +48,11 @@ function defaultRoutine() {
     intensity: 'INTENSO',
     durationLabel: '45-60 min',
     exercises: [
-      { id: 'ex1', name: 'Press de Banca con Barra', sets: 4, repMin: 6, repMax: 8, target: 90, unit: 'kg', suffix: '', rpe: '8.5', note: 'Retraccion escapular compacta. Pausa controlada de 1s en el pecho.', tag: 'PROGRESIVO' },
-      { id: 'ex2', name: 'Press Inclinado con Mancuernas', sets: 3, repMin: 10, repMax: 10, target: 32, unit: 'kg', suffix: ' c/u', rpe: '8', note: 'Inclinacion de banco a 30°. Mantener codos a 45° del torso.', tag: 'SOBRECARGA OK' },
-      { id: 'ex3', name: 'Fondos en Paralelas (Lastrados)', sets: 3, repMin: 8, repMax: 8, target: 15, unit: 'kg', suffix: '', prefix: '+', rpe: '9', note: 'Ligera inclinacion hacia adelante para mayor reclutamiento pectoral.', tag: 'META: 8 REPS' },
-      { id: 'ex4', name: 'Elevaciones Laterales', sets: 4, repMin: 12, repMax: 15, target: 14, unit: 'kg', suffix: '', rpe: '9.5', note: 'Cero balanceo con cadera; enfocar la traccion desde el codo.', tag: 'VOLUMEN DELTOIDES' },
-      { id: 'ex5', name: 'Extension de Triceps en Polea', sets: 3, repMin: 12, repMax: 12, target: 35, unit: 'kg', suffix: '', rpe: '8', note: 'Apertura de cuerda al final del recorrido con 1s de contraccion isometrica.', tag: 'INCREMENTO' }
+      { id: 'ex1', name: 'Press de Banca con Barra', sets: 4, repMin: 6, repMax: 8, target: 90, unit: 'kg', suffix: '', rpe: '8.5', note: 'Retraccion escapular compacta. Pausa controlada de 1s en el pecho.', tag: 'PROGRESIVO', restPresetId: 'hipertrofia' },
+      { id: 'ex2', name: 'Press Inclinado con Mancuernas', sets: 3, repMin: 10, repMax: 10, target: 32, unit: 'kg', suffix: ' c/u', rpe: '8', note: 'Inclinacion de banco a 30°. Mantener codos a 45° del torso.', tag: 'SOBRECARGA OK', restPresetId: 'hipertrofia' },
+      { id: 'ex3', name: 'Fondos en Paralelas (Lastrados)', sets: 3, repMin: 8, repMax: 8, target: 15, unit: 'kg', suffix: '', prefix: '+', rpe: '9', note: 'Ligera inclinacion hacia adelante para mayor reclutamiento pectoral.', tag: 'META: 8 REPS', restPresetId: 'hipertrofia' },
+      { id: 'ex4', name: 'Elevaciones Laterales', sets: 4, repMin: 12, repMax: 15, target: 14, unit: 'kg', suffix: '', rpe: '9.5', note: 'Cero balanceo con cadera; enfocar la traccion desde el codo.', tag: 'VOLUMEN DELTOIDES', restPresetId: 'aislamiento' },
+      { id: 'ex5', name: 'Extension de Triceps en Polea', sets: 3, repMin: 12, repMax: 12, target: 35, unit: 'kg', suffix: '', rpe: '8', note: 'Apertura de cuerda al final del recorrido con 1s de contraccion isometrica.', tag: 'INCREMENTO', restPresetId: 'aislamiento' }
     ]
   };
 }
@@ -455,7 +455,7 @@ function openEditExerciseModal(exId) {
   const r = state.routine;
   const isNew = !exId;
   const ex = isNew
-    ? { id: 'ex' + Date.now(), name: '', sets: 3, repMin: 8, repMax: 8, target: 20, unit: 'kg', suffix: '', prefix: '', rpe: '8', note: '', tag: '' }
+    ? { id: 'ex' + Date.now(), name: '', sets: 3, repMin: 8, repMax: 8, target: 20, unit: 'kg', suffix: '', prefix: '', rpe: '8', note: '', tag: '', restPresetId: 'hipertrofia' }
     : r.exercises.find(e => e.id === exId);
 
   openModal(`
@@ -470,6 +470,12 @@ function openEditExerciseModal(exId) {
       <div class="grid grid-cols-2 gap-space-sm">
         <div><label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Peso objetivo (kg)</label><input id="edit-ex-target" type="number" min="0" step="0.5" value="${ex.target}" class="w-full mt-1 bg-surface-container-lowest border border-outline-variant rounded-lg p-space-sm text-on-surface" /></div>
         <div><label class="font-label-caps text-label-caps text-on-surface-variant uppercase">RPE</label><input id="edit-ex-rpe" value="${ex.rpe}" class="w-full mt-1 bg-surface-container-lowest border border-outline-variant rounded-lg p-space-sm text-on-surface" /></div>
+      </div>
+      <div>
+        <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Descanso entre series</label>
+        <select id="edit-ex-rest" class="w-full mt-1 bg-surface-container-lowest border border-outline-variant rounded-lg p-space-sm text-on-surface">
+          ${REST_PRESETS.map(p => `<option value="${p.id}" ${(ex.restPresetId || 'hipertrofia') === p.id ? 'selected' : ''}>${p.label} · ${formatClock(p.seconds)}</option>`).join('')}
+        </select>
       </div>
       <div class="flex items-center gap-space-md">
         <label class="flex items-center gap-2 text-on-surface"><input id="edit-ex-percu" type="checkbox" ${ex.suffix === ' c/u' ? 'checked' : ''} class="w-5 h-5 accent-[#c3f400]"> Peso por lado (c/u)</label>
@@ -511,6 +517,7 @@ function openEditExerciseModal(exId) {
       suffix: document.getElementById('edit-ex-percu').checked ? ' c/u' : '',
       prefix: document.getElementById('edit-ex-added').checked ? '+' : '',
       rpe: document.getElementById('edit-ex-rpe').value.trim() || '8',
+      restPresetId: document.getElementById('edit-ex-rest').value,
       tag: document.getElementById('edit-ex-tag').value.trim(),
       note: document.getElementById('edit-ex-note').value.trim()
     };
@@ -542,6 +549,7 @@ function startSession() {
       suffix: ex.suffix || '',
       prefix: ex.prefix || '',
       note: ex.note,
+      restPresetId: ex.restPresetId || 'hipertrofia',
       sets: pyramidRepsFor(ex.sets).map(reps => ({
         weight: ex.target,
         reps,
@@ -747,7 +755,7 @@ function renderEntrenar() {
 
       const hasMoreAfter = ex.sets.some(s => !s.completed) || exIdx < session.exercises.length - 1;
       if (hasMoreAfter) {
-        openRestTimer(nextSetHint());
+        openRestTimer(nextSetHint(), ex.restPresetId);
       } else {
         renderEntrenar();
       }
@@ -846,7 +854,10 @@ function shortLiftName(name) {
 
 /* ============================ CRONOMETRO DESCANSO ========================= */
 
-function openRestTimer(returnHint) {
+function openRestTimer(returnHint, presetId) {
+  if (presetId && REST_PRESETS.some(p => p.id === presetId)) {
+    state.rest.activePresetId = presetId;
+  }
   const preset = REST_PRESETS.find(p => p.id === state.rest.activePresetId) || REST_PRESETS[1];
   state.rest.running = true;
   state.rest.total = preset.seconds;
