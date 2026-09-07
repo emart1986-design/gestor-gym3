@@ -64,12 +64,11 @@ function defaultRoutinePull() {
     intensity: 'INTENSO',
     durationLabel: '45-60 min',
     exercises: [
-      { id: 'ey1', name: 'Jalon al Pecho', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Tirar con los codos hacia abajo y atras; evitar impulso con el torso.', tag: '', restPresetId: 'hipertrofia' },
-      { id: 'ey2', name: 'Remo con Barra', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Torso inclinado fijo; llevar la barra al abdomen apretando omoplatos.', tag: '', restPresetId: 'hipertrofia' },
-      { id: 'ey3', name: 'Remo en Polea Sentado', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Espalda recta; tirar del mango hasta el abdomen sin balancear el torso.', tag: '', restPresetId: 'hipertrofia' },
-      { id: 'ey4', name: 'Pull-Over en Polea', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Brazos casi extendidos; el movimiento sale del dorsal, no del hombro.', tag: '', restPresetId: 'aislamiento' },
-      { id: 'ey5', name: 'Curl con Barra', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Codos pegados al torso; sin balanceo de cadera para levantar la barra.', tag: '', restPresetId: 'aislamiento' },
-      { id: 'ey6', name: 'Curl Martillo', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Agarre neutro; sube y baja controlado sin rotar la muneca.', tag: '', restPresetId: 'aislamiento' }
+      { id: 'ey1', name: 'Jalon al Pecho (agarre ancho)', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Maxima activacion de dorsal ancho (EMG); tirar con los codos hacia abajo y atras, sin impulso.', tag: 'ANCHO DE ESPALDA', restPresetId: 'hipertrofia' },
+      { id: 'ey2', name: 'Remo en Polea Sentado', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Tension constante en toda la carrera; espalda recta, tirar hasta el abdomen sin balancear el torso.', tag: 'GROSOR DE ESPALDA', restPresetId: 'hipertrofia' },
+      { id: 'ey3', name: 'Pull-Over en Polea', sets: 3, repMin: 10, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Aisla el dorsal sin pre-fatigar el biceps antes de los curls; brazos casi extendidos.', tag: 'AISLAMIENTO DORSAL', restPresetId: 'aislamiento' },
+      { id: 'ey4', name: 'Curl con Barra', sets: 4, repMin: 8, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Mayor activacion EMG de biceps braquial entre los curls; codos fijos, sin balanceo de cadera.', tag: 'MASA DE BICEPS', restPresetId: 'aislamiento' },
+      { id: 'ey5', name: 'Curl Martillo', sets: 3, repMin: 10, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Agarre neutro; enfasis en braquial y braquiorradial para grosor de brazo, no solo pico de biceps.', tag: 'BRAQUIAL/ANTEBRAZO', restPresetId: 'aislamiento' }
     ]
   };
 }
