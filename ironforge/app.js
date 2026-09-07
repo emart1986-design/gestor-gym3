@@ -94,8 +94,12 @@ function daysAgoISO(n) {
 }
 
 function defaultState() {
+  const starter = defaultRoutine();
+  starter.id = 'r1';
+  starter.day = null;
   return {
-    routine: defaultRoutine(),
+    routines: [starter],
+    activeRoutineId: starter.id,
     session: null,
     sessions: seedSessions(),
     prs: seedPRs(),
@@ -132,9 +136,17 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultState();
     const parsed = JSON.parse(raw);
+    if (parsed.routine && !parsed.routines) {
+      const migrated = Object.assign({ id: 'r1', day: null }, parsed.routine);
+      parsed.routines = [migrated];
+      parsed.activeRoutineId = migrated.id;
+      delete parsed.routine;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    }
     const base = defaultState();
     return Object.assign(base, parsed, {
-      routine: parsed.routine || base.routine,
+      routines: (parsed.routines && parsed.routines.length) ? parsed.routines : base.routines,
+      activeRoutineId: parsed.activeRoutineId || base.activeRoutineId,
       settings: Object.assign(base.settings, parsed.settings || {}),
       rest: Object.assign(base.rest, parsed.rest || {}),
       calc: Object.assign(base.calc, parsed.calc || {})
@@ -147,6 +159,21 @@ function loadState() {
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
+
+function getActiveRoutine() {
+  return state.routines.find(r => r.id === state.activeRoutineId) || state.routines[0];
+}
+
+const DAY_OPTIONS = [
+  { id: '', label: 'Sin asignar' },
+  { id: '1', label: 'Lunes' },
+  { id: '2', label: 'Martes' },
+  { id: '3', label: 'Miercoles' },
+  { id: '4', label: 'Jueves' },
+  { id: '5', label: 'Viernes' },
+  { id: '6', label: 'Sabado' },
+  { id: '0', label: 'Domingo' }
+];
 
 /* ------------------------------- UTILS ---------------------------------- */
 
@@ -309,7 +336,7 @@ function lastLoggedSet(exerciseName) {
 
 function renderRutina() {
   const container = document.getElementById('view-rutina');
-  const routine = state.routine;
+  const routine = getActiveRoutine();
   const today = new Date();
   const monday = new Date(today);
   monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
@@ -319,13 +346,23 @@ function renderRutina() {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
     const isToday = d.toDateString() === today.toDateString();
+    const assigned = state.routines.find(r => r.day === String(d.getDay()));
     weekStrip += `
-      <div class="flex-1 py-space-xs flex flex-col items-center justify-center rounded-lg transition-all ${isToday ? 'bg-primary-container text-on-primary-container font-bold shadow-[0_0_12px_rgba(195,244,0,0.35)]' : 'text-on-surface-variant'}">
+      <button data-day="${d.getDay()}" class="flex-1 py-space-xs flex flex-col items-center justify-center rounded-lg transition-all ${isToday ? 'bg-primary-container text-on-primary-container font-bold shadow-[0_0_12px_rgba(195,244,0,0.35)]' : 'text-on-surface-variant hover:bg-surface-container-high'}">
         <span class="font-label-caps text-label-caps">${DIAS_CORTOS[d.getDay()]}</span>
         <span class="font-data-metric-md text-[13px] ${isToday ? 'font-bold' : ''}">${d.getDate()}</span>
-      </div>`;
+        <span class="w-1 h-1 rounded-full mt-0.5 ${assigned ? (isToday ? 'bg-on-primary-container' : 'bg-primary-container') : 'bg-transparent'}"></span>
+      </button>`;
   }
   weekStrip += '</section>';
+
+  const routineChips = `
+    <div class="flex items-center gap-space-xs overflow-x-auto pb-1" style="scrollbar-width:none;">
+      ${state.routines.map(r => `
+        <button data-routine="${r.id}" class="shrink-0 px-space-sm py-space-xs rounded-xl font-label-caps text-label-caps whitespace-nowrap transition-all ${r.id === routine.id ? 'bg-primary-container text-on-primary-container font-bold' : 'bg-surface-container-high text-on-surface-variant hover:text-on-surface'}">${r.name}</button>
+      `).join('')}
+      <button id="btn-new-routine" class="shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-surface-container-high text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">add</span></button>
+    </div>`;
 
   const volumeEst = Math.round(estimateRoutineVolume(routine));
 
@@ -407,7 +444,7 @@ function renderRutina() {
 
   const ctaLabel = state.session ? 'Continuar Entrenamiento' : 'Iniciar Entrenamiento Hoy';
 
-  container.innerHTML = weekStrip + hero + sectionTitle +
+  container.innerHTML = weekStrip + routineChips + hero + sectionTitle +
     `<div class="flex flex-col gap-space-sm">${exerciseCards}${addExerciseBtn}</div>` +
     `<div class="pt-space-sm pb-space-xs">
       <button id="btn-start-session" class="w-full h-tap-comfortable bg-primary-container text-on-primary-container rounded-xl font-headline-sm text-headline-sm font-bold flex items-center justify-center gap-space-xs shadow-[0_4px_24px_rgba(195,244,0,0.3)] active:scale-[0.98] transition-transform duration-100 ease-out">
@@ -425,10 +462,37 @@ function renderRutina() {
   container.querySelectorAll('[data-edit-ex]').forEach(btn => {
     btn.onclick = () => openEditExerciseModal(btn.dataset.editEx);
   });
+  container.querySelectorAll('[data-routine]').forEach(btn => {
+    btn.onclick = () => { state.activeRoutineId = btn.dataset.routine; saveState(); renderRutina(); };
+  });
+  container.querySelectorAll('[data-day]').forEach(btn => {
+    btn.onclick = () => {
+      const match = state.routines.find(r => r.day === btn.dataset.day);
+      if (match) { state.activeRoutineId = match.id; saveState(); renderRutina(); }
+      else showToast('Ese dia no tiene rutina asignada todavia');
+    };
+  });
+  document.getElementById('btn-new-routine').onclick = createRoutine;
+}
+
+function createRoutine() {
+  const newRoutine = {
+    id: 'r' + Date.now(),
+    name: 'Nueva Rutina',
+    intensity: 'MODERADO',
+    durationLabel: '45-60 min',
+    day: null,
+    exercises: []
+  };
+  state.routines.push(newRoutine);
+  state.activeRoutineId = newRoutine.id;
+  saveState();
+  renderRutina();
+  openEditRoutineModal();
 }
 
 function openEditRoutineModal() {
-  const r = state.routine;
+  const r = getActiveRoutine();
   openModal(`
     <h2 class="font-headline-sm text-headline-sm text-primary font-bold mb-space-md">Editar rutina</h2>
     <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Nombre</label>
@@ -436,15 +500,33 @@ function openEditRoutineModal() {
     <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Intensidad</label>
     <input id="edit-r-intensity" value="${r.intensity}" class="w-full mt-1 mb-space-sm bg-surface-container-lowest border border-outline-variant rounded-lg p-space-sm text-on-surface" />
     <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Duracion (texto)</label>
-    <input id="edit-r-duration" value="${r.durationLabel}" class="w-full mt-1 mb-space-md bg-surface-container-lowest border border-outline-variant rounded-lg p-space-sm text-on-surface" />
+    <input id="edit-r-duration" value="${r.durationLabel}" class="w-full mt-1 mb-space-sm bg-surface-container-lowest border border-outline-variant rounded-lg p-space-sm text-on-surface" />
+    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Dia de la semana</label>
+    <select id="edit-r-day" class="w-full mt-1 mb-space-md bg-surface-container-lowest border border-outline-variant rounded-lg p-space-sm text-on-surface">
+      ${DAY_OPTIONS.map(d => `<option value="${d.id}" ${(r.day || '') === d.id ? 'selected' : ''}>${d.label}</option>`).join('')}
+    </select>
     <button id="btn-save-routine" class="w-full h-tap-comfortable bg-primary-container text-on-primary-container rounded-xl font-headline-sm font-bold active:scale-[0.98] transition-transform">Guardar</button>
+    ${state.routines.length > 1 ? '<button id="btn-delete-routine" class="w-full h-tap-min mt-space-sm bg-surface-container-high rounded-xl text-error font-headline-sm active:scale-[0.98] transition-transform">Eliminar rutina</button>' : ''}
     <button id="btn-cancel-routine" class="w-full h-tap-min mt-space-sm bg-surface-container-high rounded-xl text-on-surface-variant font-headline-sm active:scale-[0.98] transition-transform">Cancelar</button>
   `);
   document.getElementById('btn-cancel-routine').onclick = closeModal;
+  const deleteRoutineBtn = document.getElementById('btn-delete-routine');
+  if (deleteRoutineBtn) {
+    deleteRoutineBtn.onclick = () => {
+      if (confirm(`¿Eliminar la rutina "${r.name}"? Esto no borra tu historial de entrenamientos.`)) {
+        state.routines = state.routines.filter(x => x.id !== r.id);
+        state.activeRoutineId = state.routines[0].id;
+        saveState();
+        closeModal();
+        renderRutina();
+      }
+    };
+  }
   document.getElementById('btn-save-routine').onclick = () => {
     r.name = document.getElementById('edit-r-name').value.trim() || r.name;
     r.intensity = document.getElementById('edit-r-intensity').value.trim() || r.intensity;
     r.durationLabel = document.getElementById('edit-r-duration').value.trim() || r.durationLabel;
+    r.day = document.getElementById('edit-r-day').value || null;
     saveState();
     closeModal();
     renderRutina();
@@ -452,7 +534,7 @@ function openEditRoutineModal() {
 }
 
 function openEditExerciseModal(exId) {
-  const r = state.routine;
+  const r = getActiveRoutine();
   const isNew = !exId;
   const ex = isNew
     ? { id: 'ex' + Date.now(), name: '', sets: 3, repMin: 8, repMax: 8, target: 20, unit: 'kg', suffix: '', prefix: '', rpe: '8', note: '', tag: '', restPresetId: 'hipertrofia' }
@@ -536,7 +618,7 @@ function openEditExerciseModal(exId) {
 /* =============================== ENTRENAR ================================ */
 
 function startSession() {
-  const routine = state.routine;
+  const routine = getActiveRoutine();
   state.session = {
     startedAt: new Date().toISOString(),
     routineName: routine.name,
@@ -1493,7 +1575,7 @@ function renderProgreso() {
 }
 
 function openSavePRModal(weight, reps, est) {
-  const names = Array.from(new Set([...Object.keys(state.prs), ...state.routine.exercises.map(e => shortLiftName(e.name))]));
+  const names = Array.from(new Set([...Object.keys(state.prs), ...getActiveRoutine().exercises.map(e => shortLiftName(e.name))]));
   openModal(`
     <h2 class="font-headline-sm text-headline-sm text-primary font-bold mb-space-md">Guardar nuevo record</h2>
     <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Ejercicio</label>
