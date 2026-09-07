@@ -50,7 +50,7 @@ function defaultRoutine() {
     exercises: [
       { id: 'ex1', name: 'Press Plano', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Retraccion escapular compacta; barra baja a la linea del pecho.', tag: '', restPresetId: 'hipertrofia' },
       { id: 'ex2', name: 'Press Inclinado', sets: 4, repMin: 6, repMax: 12, target: 40, unit: 'kg', suffix: '', rpe: '8', note: 'Banco a 30-45°; descenso controlado hasta el pecho alto.', tag: '', restPresetId: 'hipertrofia' },
-      { id: 'ex3', name: 'Cruce de Poleas', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Poleas a la altura del hombro (pectoral medio); codos con leve flexion fija, cerrar como abrazando un barril.', tag: '', restPresetId: 'aislamiento' },
+      { id: 'ex3', name: 'Pec Deck', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Tension constante en el estiramiento maximo; codos con leve flexion fija, sin golpear las placas.', tag: '', restPresetId: 'aislamiento' },
       { id: 'ex4', name: 'Press de Hombro Sentado', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Core firme; evitar arquear la zona lumbar al empujar.', tag: '', restPresetId: 'hipertrofia' },
       { id: 'ex5', name: 'Vuelos Laterales', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Elevar hasta la altura del hombro, sin balanceo de cadera.', tag: '', restPresetId: 'aislamiento' },
       { id: 'ex6', name: 'Triceps tras Nuca', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Codos fijos apuntando al techo, sin abrirlos hacia los lados.', tag: '', restPresetId: 'aislamiento' }
