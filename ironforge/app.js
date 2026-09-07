@@ -44,15 +44,32 @@ const PLATE_COLORS = {
 
 function defaultRoutine() {
   return {
-    name: 'Empuje Hipertrofia A',
+    name: 'Empuje (Pecho, Hombro, Triceps)',
     intensity: 'INTENSO',
     durationLabel: '45-60 min',
     exercises: [
-      { id: 'ex1', name: 'Press de Banca con Barra', sets: 4, repMin: 6, repMax: 8, target: 90, unit: 'kg', suffix: '', rpe: '8.5', note: 'Retraccion escapular compacta. Pausa controlada de 1s en el pecho.', tag: 'PROGRESIVO', restPresetId: 'hipertrofia' },
-      { id: 'ex2', name: 'Press Inclinado con Mancuernas', sets: 3, repMin: 10, repMax: 10, target: 32, unit: 'kg', suffix: ' c/u', rpe: '8', note: 'Inclinacion de banco a 30°. Mantener codos a 45° del torso.', tag: 'SOBRECARGA OK', restPresetId: 'hipertrofia' },
-      { id: 'ex3', name: 'Fondos en Paralelas (Lastrados)', sets: 3, repMin: 8, repMax: 8, target: 15, unit: 'kg', suffix: '', prefix: '+', rpe: '9', note: 'Ligera inclinacion hacia adelante para mayor reclutamiento pectoral.', tag: 'META: 8 REPS', restPresetId: 'hipertrofia' },
-      { id: 'ex4', name: 'Elevaciones Laterales', sets: 4, repMin: 12, repMax: 15, target: 14, unit: 'kg', suffix: '', rpe: '9.5', note: 'Cero balanceo con cadera; enfocar la traccion desde el codo.', tag: 'VOLUMEN DELTOIDES', restPresetId: 'aislamiento' },
-      { id: 'ex5', name: 'Extension de Triceps en Polea', sets: 3, repMin: 12, repMax: 12, target: 35, unit: 'kg', suffix: '', rpe: '8', note: 'Apertura de cuerda al final del recorrido con 1s de contraccion isometrica.', tag: 'INCREMENTO', restPresetId: 'aislamiento' }
+      { id: 'ex1', name: 'Press Plano', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Retraccion escapular compacta; barra baja a la linea del pecho.', tag: '', restPresetId: 'hipertrofia' },
+      { id: 'ex2', name: 'Press Inclinado', sets: 4, repMin: 6, repMax: 12, target: 40, unit: 'kg', suffix: '', rpe: '8', note: 'Banco a 30-45°; descenso controlado hasta el pecho alto.', tag: '', restPresetId: 'hipertrofia' },
+      { id: 'ex3', name: 'Aperturas', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Codos con leve flexion fija; estiramiento controlado del pectoral.', tag: '', restPresetId: 'aislamiento' },
+      { id: 'ex4', name: 'Press de Hombro Sentado', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Core firme; evitar arquear la zona lumbar al empujar.', tag: '', restPresetId: 'hipertrofia' },
+      { id: 'ex5', name: 'Vuelos Laterales', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Elevar hasta la altura del hombro, sin balanceo de cadera.', tag: '', restPresetId: 'aislamiento' },
+      { id: 'ex6', name: 'Triceps tras Nuca', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Codos fijos apuntando al techo, sin abrirlos hacia los lados.', tag: '', restPresetId: 'aislamiento' }
+    ]
+  };
+}
+
+function defaultRoutinePull() {
+  return {
+    name: 'Tiron (Espalda, Biceps)',
+    intensity: 'INTENSO',
+    durationLabel: '45-60 min',
+    exercises: [
+      { id: 'ey1', name: 'Jalon al Pecho', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Tirar con los codos hacia abajo y atras; evitar impulso con el torso.', tag: '', restPresetId: 'hipertrofia' },
+      { id: 'ey2', name: 'Remo con Barra', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Torso inclinado fijo; llevar la barra al abdomen apretando omoplatos.', tag: '', restPresetId: 'hipertrofia' },
+      { id: 'ey3', name: 'Remo en Polea Sentado', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '8', note: 'Espalda recta; tirar del mango hasta el abdomen sin balancear el torso.', tag: '', restPresetId: 'hipertrofia' },
+      { id: 'ey4', name: 'Pull-Over en Polea', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Brazos casi extendidos; el movimiento sale del dorsal, no del hombro.', tag: '', restPresetId: 'aislamiento' },
+      { id: 'ey5', name: 'Curl con Barra', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Codos pegados al torso; sin balanceo de cadera para levantar la barra.', tag: '', restPresetId: 'aislamiento' },
+      { id: 'ey6', name: 'Curl Martillo', sets: 4, repMin: 6, repMax: 12, target: 0, unit: 'kg', suffix: '', rpe: '9', note: 'Agarre neutro; sube y baja controlado sin rotar la muneca.', tag: '', restPresetId: 'aislamiento' }
     ]
   };
 }
@@ -94,12 +111,15 @@ function daysAgoISO(n) {
 }
 
 function defaultState() {
-  const starter = defaultRoutine();
-  starter.id = 'r1';
-  starter.day = null;
+  const push = defaultRoutine();
+  push.id = 'r1';
+  push.day = null;
+  const pull = defaultRoutinePull();
+  pull.id = 'r2';
+  pull.day = null;
   return {
-    routines: [starter],
-    activeRoutineId: starter.id,
+    routines: [push, pull],
+    activeRoutineId: push.id,
     session: null,
     sessions: seedSessions(),
     prs: seedPRs(),
