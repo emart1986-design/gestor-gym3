@@ -35,7 +35,6 @@
     .buscador-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
     .buscador { width: 100%; padding: 12px 12px 12px 38px; border: 0.5px solid #e5e7eb; border-radius: 8px; font-size: 15px; background: white; box-shadow: var(--shadow-card); }
     .alquiler-card { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; padding: 0 1rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-card); }
-    .alquiler-card .alumno-nombre { cursor: default; }
     .recordatorio { background: white; border: 2px solid #000000; border-radius: 8px; padding: 12px 14px; margin-bottom: 1.5rem; font-size: 13px; font-weight: 600; color: #000000; box-shadow: var(--shadow-card); display: flex; align-items: center; gap: 8px; }
     .recordatorio b { color: #dc2626; }
     .btn-toggle { width: 100%; padding: 10px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 13px; font-weight: 600; color: #000000; cursor: pointer; margin-bottom: 1rem; transition: background-color .15s ease, color .15s ease, transform .1s ease; }
@@ -147,8 +146,8 @@
 
     <div class="alquiler-card">
       <div class="alumno-fila">
-        <span class="alumno-nombre">Alquiler</span>
-        <span class="alumno-estado estado-nopagado" id="alquiler-monto">− $3.000</span>
+        <span class="alumno-nombre" id="alquiler-nombre">Alquiler</span>
+        <span class="alumno-estado estado-nopagado" id="alquiler-monto" style="cursor:pointer;">✗ $3.000</span>
         <button class="btn-edit" id="btn-editar-alquiler" title="Editar alquiler" aria-label="Editar alquiler">✎</button>
       </div>
     </div>
@@ -286,6 +285,8 @@ function getMaster() {
 }
 
 const ALQUILER_BASE = 3000;
+function getAlquilerPagos() { return JSON.parse(localStorage.getItem("gym_alquiler_pago") || "{}"); }
+function saveAlquilerPagos(p) { localStorage.setItem("gym_alquiler_pago", JSON.stringify(p)); }
 function getAlquilerData() { return JSON.parse(localStorage.getItem("gym_alquiler") || "{}"); }
 function saveAlquilerData(a) { localStorage.setItem("gym_alquiler", JSON.stringify(a)); }
 // Alquiler de un mes: si no tiene valor propio, hereda el del último mes anterior que lo tenga
@@ -372,7 +373,10 @@ function calcTotales(mes, data) {
   document.getElementById("no-pagan-mes").textContent = noPagan;
   document.getElementById("pendiente-mes").textContent = "$" + pendiente.toLocaleString();
 
-  document.getElementById("alquiler-monto").textContent = "− $" + alquiler.toLocaleString();
+  let alqPagado = !!getAlquilerPagos()[mes];
+  let alqEl = document.getElementById("alquiler-monto");
+  alqEl.className = "alumno-estado " + (alqPagado ? "estado-pagado" : "estado-nopagado");
+  alqEl.textContent = (alqPagado ? "✓ $" : "✗ $") + alquiler.toLocaleString();
 
   let totalAlumnos = pagaron + noPagan;
   let porcentaje = totalAlumnos === 0 ? 0 : Math.round((pagaron / totalAlumnos) * 100);
@@ -811,6 +815,15 @@ document.getElementById("btn-mes-sig").onclick = () => {
   if (idx < opts.length-1) { mesActual = opts[idx+1].value; document.getElementById("select-mes").value = mesActual; renderizar(mesActual); }
 };
 
+function toggleAlquilerPago() {
+  let p = getAlquilerPagos();
+  p[mesActual] = !p[mesActual];
+  saveAlquilerPagos(p);
+  calcTotales(mesActual, getData());
+}
+document.getElementById("alquiler-nombre").onclick = toggleAlquilerPago;
+document.getElementById("alquiler-monto").onclick = toggleAlquilerPago;
+
 document.getElementById("btn-editar-alquiler").onclick = () => {
   let actual = getAlquiler(mesActual);
   let entrada = prompt("Alquiler por mes ($)\nSe aplica desde este mes en adelante.", actual);
@@ -909,7 +922,7 @@ document.getElementById("btn-guardar").onclick = () => {
 };
 
 document.getElementById("btn-exportar").onclick = () => {
-  let backup = { master: getMaster(), data: getData(), alquiler: getAlquilerData(), exportado: new Date().toISOString() };
+  let backup = { master: getMaster(), data: getData(), alquiler: getAlquilerData(), alquilerPagos: getAlquilerPagos(), exportado: new Date().toISOString() };
   let blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
   let url = URL.createObjectURL(blob);
   let a = document.createElement("a");
@@ -946,6 +959,7 @@ document.getElementById("input-importar").onchange = e => {
     saveMaster(backup.master);
     saveData(backup.data);
     if (backup.alquiler && typeof backup.alquiler === "object") saveAlquilerData(backup.alquiler);
+    if (backup.alquilerPagos && typeof backup.alquilerPagos === "object") saveAlquilerPagos(backup.alquilerPagos);
     generarOpcionesMes();
     if ([...document.getElementById("select-mes").options].some(o => o.value === mesActual)) {
       document.getElementById("select-mes").value = mesActual;
