@@ -34,6 +34,8 @@
     .buscador-wrap { position: relative; margin-bottom: 1rem; }
     .buscador-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
     .buscador { width: 100%; padding: 12px 12px 12px 38px; border: 0.5px solid #e5e7eb; border-radius: 8px; font-size: 15px; background: white; box-shadow: var(--shadow-card); }
+    .alquiler-card { background: white; border-radius: 12px; border: 0.5px solid #e5e7eb; padding: 0 1rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-card); }
+    .alquiler-card .alumno-nombre { cursor: default; }
     .recordatorio { background: white; border: 2px solid #000000; border-radius: 8px; padding: 12px 14px; margin-bottom: 1.5rem; font-size: 13px; font-weight: 600; color: #000000; box-shadow: var(--shadow-card); display: flex; align-items: center; gap: 8px; }
     .recordatorio b { color: #dc2626; }
     .btn-toggle { width: 100%; padding: 10px; background: white; border: 0.5px solid #d1d5db; border-radius: 8px; font-size: 13px; font-weight: 600; color: #000000; cursor: pointer; margin-bottom: 1rem; transition: background-color .15s ease, color .15s ease, transform .1s ease; }
@@ -141,6 +143,14 @@
       <button class="btn-accion" id="btn-exportar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar backup</button>
       <button class="btn-accion" id="btn-importar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Importar backup</button>
       <input type="file" id="input-importar" accept="application/json" style="display:none;">
+    </div>
+
+    <div class="alquiler-card">
+      <div class="alumno-fila">
+        <span class="alumno-nombre">Alquiler</span>
+        <span class="alumno-estado estado-nopagado" id="alquiler-monto">− $3.000</span>
+        <button class="btn-edit" id="btn-editar-alquiler" title="Editar alquiler" aria-label="Editar alquiler">✎</button>
+      </div>
     </div>
 
     <div class="buscador-wrap">
@@ -275,6 +285,17 @@ function getMaster() {
   return m;
 }
 
+const ALQUILER_BASE = 3000;
+function getAlquilerData() { return JSON.parse(localStorage.getItem("gym_alquiler") || "{}"); }
+function saveAlquilerData(a) { localStorage.setItem("gym_alquiler", JSON.stringify(a)); }
+// Alquiler de un mes: si no tiene valor propio, hereda el del último mes anterior que lo tenga
+function getAlquiler(mes) {
+  let a = getAlquilerData();
+  if (a[mes] !== undefined) return a[mes];
+  let previos = Object.keys(a).filter(k => k < mes).sort();
+  return previos.length ? a[previos[previos.length - 1]] : ALQUILER_BASE;
+}
+
 function getData() { return JSON.parse(localStorage.getItem("gym_data") || "{}"); }
 function saveMaster(m) { localStorage.setItem("gym_master", JSON.stringify(m)); }
 function saveData(d) { localStorage.setItem("gym_data", JSON.stringify(d)); }
@@ -343,10 +364,15 @@ function calcTotales(mes, data) {
       if (a.pago) { total += a.monto; pagaron++; } else { noPagan++; pendiente += a.monto; }
     }
   }
-  document.getElementById("total-mes").textContent = "$" + total.toLocaleString();
+  let alquiler = getAlquiler(mes);
+  let totalNeto = total - alquiler;
+  document.getElementById("total-mes").textContent = (totalNeto < 0 ? "-$" : "$") + Math.abs(totalNeto).toLocaleString();
+  document.getElementById("total-mes").style.color = totalNeto < 0 ? "#dc2626" : "";
   document.getElementById("pagaron-mes").textContent = pagaron;
   document.getElementById("no-pagan-mes").textContent = noPagan;
   document.getElementById("pendiente-mes").textContent = "$" + pendiente.toLocaleString();
+
+  document.getElementById("alquiler-monto").textContent = "− $" + alquiler.toLocaleString();
 
   let totalAlumnos = pagaron + noPagan;
   let porcentaje = totalAlumnos === 0 ? 0 : Math.round((pagaron / totalAlumnos) * 100);
@@ -785,6 +811,18 @@ document.getElementById("btn-mes-sig").onclick = () => {
   if (idx < opts.length-1) { mesActual = opts[idx+1].value; document.getElementById("select-mes").value = mesActual; renderizar(mesActual); }
 };
 
+document.getElementById("btn-editar-alquiler").onclick = () => {
+  let actual = getAlquiler(mesActual);
+  let entrada = prompt("Alquiler por mes ($)\nSe aplica desde este mes en adelante.", actual);
+  if (entrada === null) return;
+  let nuevo = parseInt(String(entrada).replace(/[^\d]/g, ""));
+  if (isNaN(nuevo) || nuevo < 0) { alert("Ingresá un monto válido"); return; }
+  let a = getAlquilerData();
+  a[mesActual] = nuevo;
+  saveAlquilerData(a);
+  calcTotales(mesActual, getData());
+};
+
 document.getElementById("buscador").oninput = () => renderizar(mesActual);
 
 document.getElementById("btn-solo-pendientes").onclick = () => {
@@ -871,7 +909,7 @@ document.getElementById("btn-guardar").onclick = () => {
 };
 
 document.getElementById("btn-exportar").onclick = () => {
-  let backup = { master: getMaster(), data: getData(), exportado: new Date().toISOString() };
+  let backup = { master: getMaster(), data: getData(), alquiler: getAlquilerData(), exportado: new Date().toISOString() };
   let blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
   let url = URL.createObjectURL(blob);
   let a = document.createElement("a");
@@ -907,6 +945,7 @@ document.getElementById("input-importar").onchange = e => {
     if (!confirm("Esto reemplaza todos los datos actuales por los del archivo. ¿Continuar?")) return;
     saveMaster(backup.master);
     saveData(backup.data);
+    if (backup.alquiler && typeof backup.alquiler === "object") saveAlquilerData(backup.alquiler);
     generarOpcionesMes();
     if ([...document.getElementById("select-mes").options].some(o => o.value === mesActual)) {
       document.getElementById("select-mes").value = mesActual;
